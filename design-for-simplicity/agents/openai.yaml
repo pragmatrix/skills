@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design for Simplicity"
+  short_description: "Apply Simple Made Easy to software design"
+  default_prompt: "Use $design-for-simplicity to review this design for complecting and propose simpler alternatives."
