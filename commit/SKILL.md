@@ -25,9 +25,11 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
 
 5. **Inspect the tree.** Run `git status --short` to enumerate all staged and unstaged changes, and `git diff --stat` (+ `git diff --staged --stat` if anything is staged) to gauge scope. Note newly untracked files (`??`) too.
 
-6. **Group into logical parts.** Partition the changes into coherent units — each unit is a single feature, fix, or concern. Files that belong together (implementing one behavior, or a change plus its tests) go in the same commit. Do not commit two unrelated concerns together.
+6. **Screen for suspicious, unrelated changes (gate).** Before grouping anything into commits, look for changes that should **not** be committed at all: build/test artifacts (e.g. generated images, logs, output files), temporary scaffolding or placeholder code (e.g. `_doc`-suffixed duplicates, WIP stubs), debug leftovers, generated files that are not meant to be tracked, or changes unrelated to the intended work. Inspect the actual diff of anything that looks off rather than trusting file names alone. For each suspicious change, ask the user whether to exclude it (leave it uncommitted) or clean it up (delete/revert it) before proceeding — do not silently commit it, and do not silently drop it either. Only proceed to grouping once the user has decided.
 
-7. **Commit each part, one at a time.** For each logical part:
+7. **Group into logical parts.** Partition the changes into coherent units — each unit is a single feature, fix, or concern. Files that belong together (implementing one behavior, or a change plus its tests) go in the same commit. Do not commit two unrelated concerns together.
+
+8. **Commit each part, one at a time.** For each logical part:
    - Stage only the files in that part: `git add <paths>`
    - If a file contains changes belonging to multiple parts, stage only its relevant hunks with **partial staging** (e.g. `git add -p <path>`) so each commit stays coherent. Note that a file cannot be split across commits while its hunks remain unstaged elsewhere — split by hunk, keeping the whole file's hunks accounted for across the commit sequence.
    - Write a **concise, preferably one-line** message summarizing the change (imperative mood). Keep the subject under ~72 characters; do not pad it with long technical explanations. Reserve a short body only when a *why* is genuinely non-obvious, never for a mechanical recap of the diff.
@@ -35,12 +37,13 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
    - Commit: `git commit -m "<message>"`.
    - Move to the next logical part.
 
-8. **Push upstream (gate).** If the current branch is a dedicated working branch (verified in step 3) and it has an upstream configured, push the commits to that upstream: `git push`. If the branch is dedicated but has no upstream yet, set one and push: `git push -u origin <branch>`. If the branch is a mainline/shared branch or detached HEAD, do not push. Only push after all commits for the branch are made, so the pushed history is complete.
+9. **Push upstream (gate).** If the current branch is a dedicated working branch (verified in step 3) and it has an upstream configured, push the commits to that upstream: `git push`. If the branch is dedicated but has no upstream yet, set one and push: `git push -u origin <branch>`. If the branch is a mainline/shared branch or detached HEAD, do not push. Only push after all commits for the branch are made, so the pushed history is complete.
 
-9. **Finish.** Run `git status --short` to confirm nothing is left, and summarize the commits created (scopes and messages) to the user.
+10. **Finish.** Run `git status --short` to confirm nothing is left, and summarize the commits created (scopes and messages) to the user.
 
 ## Quality Criteria
 - Every commit is a coherent unit; no mixed unrelated changes.
+- Suspicious or unrelated changes (artifacts, scaffolding, debug leftovers) are excluded or cleaned up, never silently committed.
 - When a file spans multiple parts, its hunks are split via partial staging (`git add -p`) so no unrelated changes ride along in a commit.
 - Messages are concise and normally one line; the subject is short and imperative, and any body is brief and limited to non-obvious rationale.
 - Scoped commits follow `scope: summary` with a kebab-case scope.
