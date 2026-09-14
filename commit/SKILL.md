@@ -31,7 +31,12 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
 
 8. **Commit each part, one at a time.** For each logical part:
    - Stage only the files in that part: `git add <paths>`
-   - If a file contains changes belonging to multiple parts, stage only its relevant hunks with **partial staging** (e.g. `git add -p <path>`) so each commit stays coherent. Note that a file cannot be split across commits while its hunks remain unstaged elsewhere — split by hunk, keeping the whole file's hunks accounted for across the commit sequence.
+   - If a file contains changes belonging to multiple parts, stage only its relevant hunks with **partial staging** so each commit stays coherent. Note that a file cannot be split across commits while its hunks remain unstaged elsewhere — split by hunk, keeping the whole file's hunks accounted for across the commit sequence. Use `git add -p <path>` for this, but prefer the bundled picker `hunk-pick.py` (next to this file) when naming the hunks up front beats answering prompts, or when the sources use CRLF — it reads and writes bytes, so the patch keeps the file's line endings, which a text-mode patch does not:
+     - `python3 <skill-dir>/hunk-pick.py --list <path>` — number the hunks
+     - `python3 <skill-dir>/hunk-pick.py <path> 1 3 > /tmp/pick.patch` — keep hunks 1 and 3
+     - `git apply --cached --check /tmp/pick.patch && git apply --cached /tmp/pick.patch`
+     - Re-run `--list` after every commit: committing moves the hunks that follow, so earlier numbers no longer describe the diff.
+   - After staging a split file, read `git diff --cached` once to confirm only the intended hunks are in it — a hunk boundary can carry an unrelated line (a stray blank line, a reformat) into the commit.
    - Write a **concise, preferably one-line** message summarizing the change (imperative mood). Keep the subject under ~72 characters; do not pad it with long technical explanations. Reserve a short body only when a *why* is genuinely non-obvious, never for a mechanical recap of the diff.
    - If the change is scoped to a **subproject or an isolated part** of the project — a submodule, a self-contained directory, a standalone package — prefix the message with the scope: `scope: summary`, where `scope` is in kebab-case (e.g. `parser: ...`, `cli-shell: ...`). Omit the scope when the change touches the whole project or crosses many areas.
    - Commit: `git commit -m "<message>"`.
@@ -44,7 +49,7 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
 ## Quality Criteria
 - Every commit is a coherent unit; no mixed unrelated changes.
 - Suspicious or unrelated changes (artifacts, scaffolding, debug leftovers) are excluded or cleaned up, never silently committed.
-- When a file spans multiple parts, its hunks are split via partial staging (`git add -p`) so no unrelated changes ride along in a commit.
+- When a file spans multiple parts, its hunks are split via partial staging (`git add -p`, or the bundled `hunk-pick.py` where naming the hunks up front or CRLF sources make prompting the wrong tool) so no unrelated changes ride along in a commit, and the staged diff was read back to confirm it.
 - Messages are concise and normally one line; the subject is short and imperative, and any body is brief and limited to non-obvious rationale.
 - Scoped commits follow `scope: summary` with a kebab-case scope.
 - The tree is formatted and tests pass before committing.

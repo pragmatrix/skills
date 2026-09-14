@@ -61,6 +61,8 @@ Apply these conventions from the target repository instructions and local code p
 - Cache repeated expensive state lookups at callers when appropriate.
 - During event-flow refactors, keep side-effect dispatch ordering unchanged.
 - In tests, keep test cases before helpers.
+- Order items by the stepdown rule (reverse topological order): callers and dependent types first, the functions/types they depend on declared below them, leaf/helper items lowest.
+- Exception to the stepdown rule: constants, mode/switch enums, and defaults go above the functions and types they are defined for — readers meet the policy values before the code that selects on them.
 - Use concise, intent-focused comments only when logic is non-obvious.
 
 ## Procedure
@@ -84,8 +86,9 @@ Apply these conventions from the target repository instructions and local code p
 - Control flow: prefer exhaustive `match` for enum-driven behavior where it improves clarity.
 - Use `matches!` for simple boolean pattern checks and filter predicates; do not force equivalent `match`/`if let` forms that reduce readability or trigger lint noise.
 - Naming: remove ambiguous prefixes/suffixes (for example `maybe_`, `_ref`) in favor of neutral names.
-- Structure: keep high-level functions first, helpers later; maintain call-hierarchy ordering when moving/extracting.
+- Structure: apply the stepdown rule (reverse topological order) to functions and types — high-level callers and dependent types at the top, their dependencies declared below them, leaf/helper items lowest; maintain call-hierarchy ordering when moving/extracting.
 - Place local helper types and validators lower in the file when they are implementation details of a specific flow.
+- Keep constants, switch/mode enums, and defaults above the items they configure, even under the stepdown rule.
 - Type layout: keep each type declaration contiguous with its own impl blocks; avoid interleaving impls for different types.
 - State/invariants: remove silent fallbacks and redundant mirrored state where invariants can be explicit.
 - Comments: keep only concise intent comments for non-obvious logic.
