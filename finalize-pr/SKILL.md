@@ -78,13 +78,14 @@ Pause at the review step and wait for the user's direction before creating the P
 6. **Version changed public contracts.**
    - Look for `VERSIONING.md` at the repository root. If it exists, follow it as the source of truth for which projects and public interfaces are versioned, which version declarations and histories must stay synchronized, and when a release-history entry is required.
    - If `VERSIONING.md` does not exist, use the default rule: when the project exposes public network interfaces or APIs and the branch changes either, update the version of every project involved in the change according to Semantic Versioning before final checks.
+   - **Every behavioral change bumps the version by at least a patch increment**, in the commit that introduces the change. Behavioral changes include new or altered runtime behavior, protocol changes, new configuration, and new warnings or log outcomes that affect operation. Non-behavioral changes (comment updates, doc rewording, formatting, refactors without observable behavior change) do not require a bump.
    - Include the version update in the relevant logical commit and describe the public-contract change in the PR.
 
-7. **Run formatting and lint checks, then the full test suite.**
+7. **Run formatting and lint checks, then the current project's full test suite.**
    - Run the repo's formatting check **before** the test run and before touching the PR, so CI's formatting job (e.g. `cargo fmt -- --check`) does not fail after the PR is opened/updated.
    - If `cargo fmt -- --check` (or the `justfile`'s fmt recipe) reports a diff, run `cargo fmt` (or the equivalent formatter) to apply it, then confirm the check is clean. Treat a clean `cargo fmt -- --check` as a required gate — format changes must be committed with the **commit** skill before proceeding.
-   - Then run a full test run (e.g. `cargo test`, plus the repo's other lint steps via its `justfile` if defined). The PR must reflect a state that builds and passes tests.
-   - Only proceed to the PR step if formatting and tests are green; otherwise fix, re-run the **commit** skill, and re-run the checks.
+   - Then run the full test suite for the project currently being finalized, plus the repo's other lint steps via its `justfile` if defined. Scope nested commands to the changed project and directly affected crates where needed (e.g. `cargo test -p <crate>`). Do not run test suites for foreign projects: independent nested repositories, submodules being finalized separately, dependency projects, or unrelated path-dependency workspaces merely because they are available from the repository. The PR must reflect a state that builds and passes the current project's tests.
+   - Only proceed to the PR step if formatting and the current project's tests are green; otherwise fix, re-run the **commit** skill, and re-run the checks. Record foreign-project test failures as residual risks instead of changing unrelated projects.
 
 8. **Create or update the PR/MR.**
    - Follow the **pr** skill's host-specific creation/update procedure: use `gh pr` for GitHub or `glab mr --repo <group/project>` for GitLab, and always append the AI disclosure block. The **pr** skill owns the shared mechanics; reuse it here rather than duplicating the steps.
@@ -116,6 +117,7 @@ Pause at the review step and wait for the user's direction before creating the P
 - If the working tree is dirty: run the **commit** skill to commit outstanding work before reviewing.
 - If submodules are affected: finalize each affected submodule's PR first (recursively) before the parent, so the parent's pointer bump references an already-PR'd commit.
 - If the diff is behavior-critical: recommend a thorough review before the user decides.
+- If the diff contains a behavioral change without a version bump: apply the patch (or larger) bump per step 6 before the PR, and ask the user only when it is unclear whether the change is behavioral.
 - If the user picks "fix issues first": commit the fixes with the **commit** skill, loop back to reviewing until findings are resolved or accepted, then continue through the full test run and PR step.
 - If the full test run or formatting check fails: fix, commit via the **commit** skill, and re-run the checks before creating/updating the PR.
 - If the user picks "hold": stop entirely; nothing is created or updated.
@@ -130,8 +132,9 @@ Mark the skill complete when all of the current request's steps are true:
 - Findings were presented to the user and the user chose a path (fix, proceed, or hold)
 - Any review fixes were committed with the commit skill
 - Repository-specific `VERSIONING.md` guidance was followed when present; otherwise the default Semantic Versioning rule was applied
+- Every behavioral change in the branch bumped the version by at least a patch increment, committed with the change
 - The formatting check (e.g. `cargo fmt -- --check`) passed cleanly before creating/updating the PR
-- A full test run passed before creating/updating the PR
+- The current project's full test suite passed before creating/updating the PR; foreign-project suites were excluded
 - The PR/MR body explains the rationale in a `Why` section and links relevant context when available
 - A PR exists for the branch (created or updated) reflecting the final state
 - If auto-merge was requested: auto-merge was enabled for the PR

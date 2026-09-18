@@ -61,6 +61,7 @@ Do not use when the user wants a rebase or a code review as part of the workflow
      > [!NOTE]
      > This pull request was developed with assistance from an AI coding agent alongside the author.
      ```
+   - Use a concise body structure with a `## Rationale` section explaining why the change is needed, followed by a `## Summary` section. Add other sections only when they improve reviewability.
    Author the body in a temp file and pass it through `--body-file` for `gh` or `--description-file` for `glab` so the disclosure is included reliably.
    - Confirm the PR was created/updated successfully. This is the skill's end state by default — do **not** merge on your own.
 

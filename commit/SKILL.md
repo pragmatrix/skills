@@ -17,7 +17,7 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
 
 1. **Format the tree.** Run `cargo fmt` (or the project's equivalent formatter) before staging anything, so the committed diff is clean and consistent. If the workspace has multiple crates or a submodule, run the formatter in each relevant root (e.g. `cargo fmt` in the workspace root and in the submodule) so all changed files are formatted. Do not stage or commit until formatting is applied.
 
-2. **Run the test gate.** Run the tests that might be affected by the changes before committing, so the committed state builds and passes. Scope the test run to the crates/modules touched by the diff rather than the whole suite: identify the affected crates (e.g. from `git diff --stat` or the changed paths) and run their tests (e.g. `cargo test -p <crate>`), plus the repo's other lint steps via its `justfile` if defined. If a test fails, fix the failure, re-run the formatter, and re-run the affected tests before proceeding. Do not commit until the affected tests pass.
+2. **Run the narrowest relevant check.** Documentation-only commits need no tests. For code, run the nearest targeted test filter when one exists; otherwise run the changed package's compile check. Do not run full package, dependent-package, workspace, foreign-project, or benchmark suites by default. Do not run benchmarks or `cargo bench` unless explicitly requested; `cargo check --benches` is allowed only to compile changed benchmark code. Apply the same rule inside dirty submodules, but do not rerun submodule checks for a parent pointer-only commit.
 
 3. **Verify branch state (gate).** Check that the repository and any dirty submodules are on a dedicated working branch before committing anything. Only perform this check for the repository and for submodules that actually have changes; skip submodules that are clean. A dedicated branch means `git branch --show-current` returns a non-empty branch name (i.e. not detached HEAD) and that branch isn't a shared/mainline branch like `main`, `master`, or `develop`. If the repository or a dirty submodule is in detached HEAD, on an empty/unborn branch, or on a mainline branch, stop and do not commit — ask the user to check out a dedicated branch first. Running `git status --short` won't reveal this, so verify branch state explicitly.
 
@@ -26,6 +26,9 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
 5. **Inspect the tree.** Run `git status --short` to enumerate all staged and unstaged changes, and `git diff --stat` (+ `git diff --staged --stat` if anything is staged) to gauge scope. Note newly untracked files (`??`) too.
 
 6. **Screen for suspicious, unrelated changes (gate).** Before grouping anything into commits, look for changes that should **not** be committed at all: build/test artifacts (e.g. generated images, logs, output files), temporary scaffolding or placeholder code (e.g. `_doc`-suffixed duplicates, WIP stubs), debug leftovers, generated files that are not meant to be tracked, or changes unrelated to the intended work. Inspect the actual diff of anything that looks off rather than trusting file names alone. For each suspicious change, ask the user whether to exclude it (leave it uncommitted) or clean it up (delete/revert it) before proceeding — do not silently commit it, and do not silently drop it either. Only proceed to grouping once the user has decided.
+
+   Two screening traps observed in practice:
+   - **Untracked directories that contain nested git repos** (`dir/.git` file pointing elsewhere, no gitlink in the index) show up as one `??` path; `git add .` pulls in their entire vendored contents (thousands of files). Never bulk-add them; check `git ls-tree HEAD <path>` (already tracked?), whether the tree duplicates already-tracked paths elsewhere, and diff the copies before committing anything.
 
 7. **Group into logical parts.** Partition the changes into coherent units — each unit is a single feature, fix, or concern. Files that belong together (implementing one behavior, or a change plus its tests) go in the same commit. Do not commit two unrelated concerns together.
 
@@ -46,14 +49,3 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
 
 10. **Finish.** Run `git status --short` to confirm nothing is left, and summarize the commits created (scopes and messages) to the user.
 
-## Quality Criteria
-- Every commit is a coherent unit; no mixed unrelated changes.
-- Suspicious or unrelated changes (artifacts, scaffolding, debug leftovers) are excluded or cleaned up, never silently committed.
-- When a file spans multiple parts, its hunks are split via partial staging (`git add -p`, or the bundled `hunk-pick.py` where naming the hunks up front or CRLF sources make prompting the wrong tool) so no unrelated changes ride along in a commit, and the staged diff was read back to confirm it.
-- Messages are concise and normally one line; the subject is short and imperative, and any body is brief and limited to non-obvious rationale.
-- Scoped commits follow `scope: summary` with a kebab-case scope.
-- The tree is formatted and tests pass before committing.
-- The repository and any committed submodules are on a dedicated working branch before committing.
-- Commits on a dedicated branch are pushed to their upstream once the branch's commits are complete.
-- Nothing is left uncommitted unless the user explicitly wants it excluded.
-- No force-pushes or history rewrites of shared history.
