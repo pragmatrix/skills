@@ -89,7 +89,8 @@ Pause at the review step and wait for the user's direction before creating the P
 
 8. **Create or update the PR/MR.**
    - Follow the **pr** skill's host-specific creation/update procedure: use `gh pr` for GitHub or `glab mr --repo <group/project>` for GitLab, and always append the AI disclosure block. The **pr** skill owns the shared mechanics; reuse it here rather than duplicating the steps.
-   - Structure the PR/MR body with `Why`, `Summary`, and `Validation` sections before the disclosure block. `Why` must explain the concrete user need, defect, constraint, or operational problem that motivates the change; do not merely restate what the diff does. Link relevant issues, ADRs, or upstream PRs when available.
+   - Structure the PR/MR body with H2 (`##`) headings in this order: `## Why`, `## Summary`, `## Validation`, before the disclosure block. `Why` must explain the concrete user need, defect, constraint, or operational problem that motivates the change; do not merely restate what the diff does. Link relevant issues, ADRs, or upstream PRs when available.
+   - The disclosure block must never name the model, model type, or vendor involved — the generic "AI coding agent" wording from the **pr** skill is the fixed form.
    - Confirm the PR was created/updated successfully; do **not** merge on your own.
    - Present the optional next steps and wait for direction: enable host-specific auto-merge so the PR/MR merges once CI passes, and/or clean up the branch.
 

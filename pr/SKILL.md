@@ -53,15 +53,15 @@ Do not use when the user wants a rebase or a code review as part of the workflow
    - Draft the proposed title and complete body, including any required submodule references and the AI disclosure block. Present both to the user and ask for explicit permission to post or update the remote PR/MR. Do not create or update the PR/MR until the user approves the exact text, or provides revised text.
     - On GitHub, detect with `gh pr view <branch>`, create with `gh pr create --base <base> --head <branch> --title <title> --body-file <file>`, or update with `gh pr edit <pr> --title <title> --body-file <file>`.
     - On GitLab, detect with `glab mr view <branch> --repo <group/project>`, create with `glab mr create --repo <group/project> --source-branch <branch> --target-branch <base> --title <title> --description-file <file> --yes`, or update with `glab mr update <mr> --repo <group/project> --title <title> --description-file <file> --yes`.
-   - **When multiple PRs exist (submodule and parent), reference the submodule PRs from the parent's PR body.** Add a "Submodule PRs" section listing each affected submodule, its branch, and its PR link (e.g. `- mylib@branch: <url>`), placed before the AI disclosure block so reviewers can see the dependent changes. The submodule's own PR body must not mention the parent project in return (see step 2).
-   - **Always end the PR body with an AI disclosure block** (unless the user says otherwise). Append a `> [!NOTE]` block at the end of the body:
+   - **When multiple PRs exist (submodule and parent), reference the submodule PRs from the parent's PR body.** Add a `## Submodule PRs` H2 section listing each affected submodule, its branch, and its PR link (e.g. `- mylib@branch: <url>`), placed before the AI disclosure block so reviewers can see the dependent changes. The submodule's own PR body must not mention the parent project in return (see step 2).
+   - **Always end the PR body with an AI disclosure block** (unless the user says otherwise). Never name the model, model type, or vendor in it — describing the assistance generically with "AI coding agent" is sufficient. Append a `> [!NOTE]` block at the end of the body:
      ```markdown
      ---
 
      > [!NOTE]
      > This pull request was developed with assistance from an AI coding agent alongside the author.
      ```
-   - Use a concise body structure with a `## Rationale` section explaining why the change is needed, followed by a `## Summary` section. Add other sections only when they improve reviewability.
+   - Structure the body with H2 (`##`) headings in this order: `## Why` (the rationale explaining why the change is needed), then `## Summary`, then optional further H2 sections when they improve reviewability (e.g. `## Validation`, `## Submodule PRs`).
    Author the body in a temp file and pass it through `--body-file` for `gh` or `--description-file` for `glab` so the disclosure is included reliably.
    - Confirm the PR was created/updated successfully. This is the skill's end state by default — do **not** merge on your own.
 
