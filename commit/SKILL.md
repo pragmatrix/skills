@@ -1,6 +1,6 @@
 ---
 name: commit
-description: 'Split a dirty working tree into separated logical commits with concise one-line messages and scope prefixes. Use when the user explicitly asks for logical/scoped commits, e.g. invoking /commit or requesting commits split by feature. Not triggered by a plain "commit".'
+description: 'Split a dirty working tree into separated logical commits, each with a mandatory single-line `prefix: summary` message (no body, no attribution). Use when the user explicitly asks for logical/scoped commits, e.g. invoking /commit or requesting commits split by feature. Not triggered by a plain "commit".'
 user-invocable: true
 ---
 
@@ -36,13 +36,14 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
    - Stage only the files in that part: `git add <paths>`
    - If a file contains changes belonging to multiple parts, stage only its relevant hunks with **partial staging** so each commit stays coherent. Note that a file cannot be split across commits while its hunks remain unstaged elsewhere — split by hunk, keeping the whole file's hunks accounted for across the commit sequence. Use `git add -p <path>` for this, but prefer the bundled picker `hunk-pick.sh` (next to this file) when naming the hunks up front beats answering prompts, or when the sources use CRLF — it reads and writes bytes, so the patch keeps the file's line endings, which a text-mode patch does not:
    - `<skill-dir>/hunk-pick.sh --list <path>` — number the hunks
-   - `<skill-dir>/hunk-pick.sh <path> 1 3 > /tmp/pick.patch` — keep hunks 1 and 3
-     - `git apply --cached --check /tmp/pick.patch && git apply --cached /tmp/pick.patch`
+   - `<skill-dir>/hunk-pick.sh <path> 1 3 > "$TMPDIR/pick.patch"` — keep hunks 1 and 3
+     - `git apply --cached --check "$TMPDIR/pick.patch" && git apply --cached "$TMPDIR/pick.patch"`
    - Re-run `--list` after every commit: committing moves the hunks that follow, so earlier numbers no longer describe the diff.
    - After staging a split file, read `git diff --cached` once to confirm only the intended hunks are in it — a hunk boundary can carry an unrelated line (a stray blank line, a reformat) into the commit.
-   - Write a **concise, preferably one-line** message summarizing the change (imperative mood). Keep the subject under ~72 characters; do not pad it with long technical explanations. Reserve a short body only when a *why* is genuinely non-obvious, never for a mechanical recap of the diff.
-   - If the change is scoped to a **subproject or an isolated part** of the project — a submodule, a self-contained directory, a standalone package — prefix the message with the scope: `scope: summary`, where `scope` is in kebab-case (e.g. `parser: ...`, `cli-shell: ...`). Omit the scope when the change touches the whole project or crosses many areas.
-   - Commit: `git commit -m "<message>"`.
+   - Write a **single-line** message summarizing the change in imperative mood — a subject only, never a body. Keep the subject under ~72 characters; do not pad it with long technical explanations.
+   - Always prefix the message with the scope: `prefix: summary`, where `prefix` is in kebab-case (e.g. `mt: ...`, `parser: ...`, `cli-shell: ...`) and names the subproject or area the change is scoped to.
+   - Never add a trailer, attribution line, or AI-assistance disclosure such as `Assisted-by`, `AI-Assisted`, or `Co-authored-by` — the message is exactly the one-line subject.
+   - Commit: `git commit -m "<prefix>: <summary>"` — a single `-m` carrying only the subject.
    - Move to the next logical part.
 
 9. **Push upstream (gate).** If the current branch is a dedicated working branch (verified in step 3) and it has an upstream configured, push the commits to that upstream: `git push`. If the branch is dedicated but has no upstream yet, set one and push: `git push -u origin <branch>`. If the branch is a mainline/shared branch or detached HEAD, do not push. Only push after all commits for the branch are made, so the pushed history is complete.

@@ -41,11 +41,10 @@ Use when the request includes anything like:
 
 4. **Draft the comment.**
    - **Never trigger interactions with other participants.** No @mentions, and no questions addressed to reviewers or anyone else — state open items plainly. The only exception is something genuinely blocked that the user cannot resolve alone, and even then phrase it as a neutral remark, without an @mention and without asking anyone to act.
-   - **Write for the ticket's audience, not for yourself.** Post only what the other participants can observe or care about: user-visible changes, the feedback a change answers, and whether it was verified. Leave out internal mechanics — refactors, constants, parameter plumbing, build/test noise, and per-commit recaps of what each diff did.
-   - **List every commit from this session**, each with a short one-line description, however small or off-topic it looks. Never drop one as uninteresting — the list is what makes the work traceable, and reviewers use it to jump into the code. This is deliberately *not* governed by the audience rule above: the descriptions are audience-facing, the list is complete.
-   - **Make the SHAs auto-link**: plain text, 7+ characters — no backticks, no code span, no manual link, no URL. GitHub and GitLab both link a bare SHA that exists in the repo, and neither links one inside a code span. Prefer 8+ characters (GitLab's default display length).
+   - **Write for the ticket's audience, not for yourself.** Post only what the other participants can observe or care about: user-visible changes, the feedback a change answers, and whether it was verified. Leave out internal mechanics — refactors, constants, parameter plumbing, build/test noise, and per-commit recaps of what each diff did. Do not list individual commits; git history on the PR already covers them.
    - Write in the same language as the rest of the PR, even if that differs from the session's language.
-   - Two sections, then the commit list as reference material:
+   - Never name a model, model type, or vendor anywhere in the comment.
+   - Two sections, then the disclosure block:
      ```markdown
      **What's changed**
 
@@ -55,14 +54,8 @@ Use when the request includes anything like:
 
      <unfinished / deferred / in-progress items, stated plainly; or omit this section if none>
 
-     Commits:
-
-     - <sha> — <one-line description>
-     - <sha> — <one-line description>
-
-     ---
-
-     _This comment was created entirely with AI assistance._
+     > [!NOTE]
+     > This was created entirely with AI assistance.
      ```
    - **If this skill was already used earlier in the session**, don't draft a full duplicate — check the PR comment thread for a prior update comment and draft only the *updates* since then, so the thread stays concise.
 

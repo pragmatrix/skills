@@ -58,7 +58,7 @@ If the crate type or location is missing, ask for it.
 - `.github/instructions/*.instructions.md` — topic-specific rules (testing, error handling, data loading) with `applyTo` globs so they load only when relevant.
 
 4. Add the "review at finalization" rule.
-- In `shared-instructions.md`, add a `## Code Review` section: run the `rust-code-review` skill after the series of edits is complete and before declaring the work done, for any non-trivial change; exempt trivial/mechanical changes.
+- In `shared-instructions.md`, add a `## Code Review` section: run the `review` skill after the series of edits is complete and before declaring the work done, for any non-trivial change; exempt trivial/mechanical changes. The `review` skill dispatches to the matching per-language review skill (e.g. `rust-code-review`).
 
 5. Write instructions with "why".
 - For each consequential rule, include the reasoning (e.g. "derives are less error-prone and stay in sync with the type").

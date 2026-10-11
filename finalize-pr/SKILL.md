@@ -9,7 +9,7 @@ user-invocable: true
 
 Use this skill to take the current branch from "changes committed" to "PR/MR opened or updated": it commits any outstanding work with the **commit** skill, rebases onto the target branch, runs a code review, gets your input on the findings, commits any review changes, runs the formatting check and full test suite, then opens or updates a GitHub PR with `gh` or a GitLab MR with `glab`. If submodules are affected, it finalizes them first (recursively) before the parent. Stopping at the PR/MR is the intended end state unless the user explicitly asks to go further. It does **not** merge on its own.
 
-If the branch touches Rust code, load and follow the **rust-code-review** skill for the review portion (step 4).
+Load and follow the **review** skill for the review portion (step 4) — it dispatches to the matching per-language review skill (e.g. `rust-code-review` for Rust) and the shared standards.
 
 For the path that commits outstanding work, runs the format/test gates, and opens/updates a PR — without the rebase and code review — delegate to the **pr** skill instead.
 
@@ -61,8 +61,7 @@ Pause at the review step and wait for the user's direction before creating the P
    - Re-run the full test suite after the rebase so the reviewed and later PR'd state is verified (not just the pre-rebase commits).
 
 4. **Review the branch.**
-   - Determine whether the diff touches Rust: check `git diff --name-only <base>...HEAD` for `.rs` files (also treat `Cargo.toml`, `Cargo.lock`, and Rust build scripts as signals).
-   - If it does, load the **rust-code-review** skill and apply it to the diff `git diff <base>...HEAD`; otherwise review the diff using the applicable conventions for the languages involved.
+   - Load and follow the **review** skill, applying it to the diff `git diff <base>...HEAD`. It selects the matching per-language review skill (e.g. **rust-code-review** for Rust; detect via `git diff --name-only <base>...HEAD` for `.rs` files, treating `Cargo.toml`, `Cargo.lock`, and Rust build scripts as signals) and the shared standards for the languages involved.
    - Run the review at the chosen depth; collect findings severity-ordered (Critical, High, Medium, Low).
    - Do not report missing version updates as review findings. Versioning is evaluated only in step 6, after the user has chosen how to proceed with the review.
 
@@ -72,7 +71,7 @@ Pause at the review step and wait for the user's direction before creating the P
      - **Proceed anyway** — open the PR with known findings (e.g., minor/acceptable risk).
      - **Hold** — stop before any PR.
    - If the user chooses to fix, apply edits, then run the **commit** skill to commit the review changes before proceeding.
-   - If findings are style-only and a refactor is wanted, hand off to **rust-code-style**.
+   - If findings are style-only and a refactor is wanted, hand off to **rust-code-style** (referenced by the **review** skill for Rust style work).
    - Do not create or update the PR until the user has explicitly approved proceeding.
 
 6. **Version changed public contracts.**
@@ -88,9 +87,9 @@ Pause at the review step and wait for the user's direction before creating the P
    - Only proceed to the PR step if formatting and the current project's tests are green; otherwise fix, re-run the **commit** skill, and re-run the checks. Record foreign-project test failures as residual risks instead of changing unrelated projects.
 
 8. **Create or update the PR/MR.**
-   - Follow the **pr** skill's host-specific creation/update procedure: use `gh pr` for GitHub or `glab mr --repo <group/project>` for GitLab, and always append the AI disclosure block. The **pr** skill owns the shared mechanics; reuse it here rather than duplicating the steps.
-   - Structure the PR/MR body with H2 (`##`) headings in this order: `## Why`, `## Summary`, `## Validation`, before the disclosure block. `Why` must explain the concrete user need, defect, constraint, or operational problem that motivates the change; do not merely restate what the diff does. Link relevant issues, ADRs, or upstream PRs when available.
-   - The disclosure block must never name the model, model type, or vendor involved — the generic "AI coding agent" wording from the **pr** skill is the fixed form.
+   - Follow the **pr** skill's host-specific creation/update procedure: use `gh pr` for GitHub or `glab mr --repo <group/project>` for GitLab. The **pr** skill owns the shared mechanics; reuse it here rather than duplicating the steps.
+   - Structure the PR/MR body with H2 (`##`) headings in this order: `## Why`, `## Summary`, `## Validation`. `Why` must explain the concrete user need, defect, constraint, or operational problem that motivates the change; do not merely restate what the diff does. Link relevant issues, ADRs, or upstream PRs when available.
+   - End the PR/MR body with the AI-assistance disclosure, and never name a model, model type, or vendor in the body or title — see the **pr** skill for the exact block and its placement.
    - Confirm the PR was created/updated successfully; do **not** merge on your own.
    - Present the optional next steps and wait for direction: enable host-specific auto-merge so the PR/MR merges once CI passes, and/or clean up the branch.
 
@@ -120,6 +119,7 @@ Pause at the review step and wait for the user's direction before creating the P
 - If the diff is behavior-critical: recommend a thorough review before the user decides.
 - If the diff contains a behavioral change without a version bump: apply the patch (or larger) bump per step 6 before the PR, and ask the user only when it is unclear whether the change is behavioral.
 - If the user picks "fix issues first": commit the fixes with the **commit** skill, loop back to reviewing until findings are resolved or accepted, then continue through the full test run and PR step.
+- If findings are style-only and a refactor is wanted: hand off to **rust-code-style** (via the **review** skill's style-refactor path when applicable).
 - If the full test run or formatting check fails: fix, commit via the **commit** skill, and re-run the checks before creating/updating the PR.
 - If the user picks "hold": stop entirely; nothing is created or updated.
 
@@ -129,7 +129,7 @@ Mark the skill complete when all of the current request's steps are true:
 - Outstanding work was committed with the commit skill
 - If submodules were affected: each affected submodule's PR was finalized (recursively) before the parent's PR
 - The branch was rebased onto the target branch and dropped any upstream-absorbed commits
-- The branch was reviewed with the rust-code-review skill if it touches Rust code (or otherwise reviewed per the languages involved)
+- The branch was reviewed with the **review** skill (which applies the matching per-language review skill, e.g. rust-code-review for Rust)
 - Findings were presented to the user and the user chose a path (fix, proceed, or hold)
 - Any review fixes were committed with the commit skill
 - Repository-specific `VERSIONING.md` guidance was followed when present; otherwise the default Semantic Versioning rule was applied

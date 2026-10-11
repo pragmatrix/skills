@@ -40,18 +40,20 @@ If scope is missing, ask for it.
 
 Apply these conventions from the target repository instructions and local code patterns:
 - Prefer small, self-contained changes.
-- Keep functions small, clear, deterministic.
+- Give each function one cohesive responsibility; separate distinct responsibilities when they have different policies or invariants.
+- Avoid shallow functions that only rename or forward a call; keep one when it gives a meaningful domain name, centralizes policy or invariants, or defines a useful API boundary.
 - Prefer deriving traits over manual implementations when equivalent.
 - Use common-root imports with at most one level of brace nesting (module or item).
 - Flatten any deeper nested `use` brace trees; do not preserve deeper nesting even when nearby code uses it.
 - Prefer qualified enum variants when that improves clarity.
 - Default to `pub`; use `pub(crate)` only when containing module is crate-public.
 - Prefer adding fields to existing structs over parallel data structures.
+- Extract a named argument type when the same coherent combination of inputs recurs across functions; do not bundle unrelated or one-off arguments just to shorten a signature.
 - Prefer constructor functions and derive helpers for newtypes.
 - Include `Copy` and `Clone` for newtypes when wrapped type supports them.
 - Prefer named structs over tuple returns when ordering/intent is ambiguous.
 - Prefer behavior-named methods over exposing raw mode enums.
-- For binary options, prefer `bool` fields over two-variant enums when no additional states are expected.
+- Prefer enums over booleans when a value represents a domain choice or mode; introduce a shared enum when the same choice recurs in several places. Reserve booleans for genuinely independent on/off flags.
 - For option/flags structs, prefer `Default` as the baseline state and explicit opt-in fields for enabled behavior.
 - Keep one source of truth for mutable state; avoid mirrored caches unless justified.
 - Keep invariant checks and mode gating at one layer.
@@ -77,24 +79,18 @@ Apply these conventions from the target repository instructions and local code p
 - Check diagnostics first before running heavy build commands.
 
 3. Plan minimal refactors.
-- Group edits into small independent steps (imports, derives, naming, ordering, invariant cleanup).
+- Group edits into small independent steps following the step 4 sequence.
 - Skip non-essential rewrites that increase churn without maintenance benefit.
 
-4. Apply style transformations in this order.
-- Imports: normalize to common-root lines and keep brace nesting to one level maximum.
-- Traits/newtypes: replace equivalent manual impls with derives; keep trait surface stable.
-- Control flow: prefer exhaustive `match` for enum-driven behavior where it improves clarity.
-- Use `matches!` for simple boolean pattern checks and filter predicates; do not force equivalent `match`/`if let` forms that reduce readability or trigger lint noise.
+4. Apply style transformations, in this order, following the Baseline conventions: imports → traits/newtypes → control flow → naming → structure → state/invariants → comments.
+- Structure: apply the stepdown rule to every touched module, keeping each type with its impl blocks and preserving call-hierarchy ordering when moving or extracting items.
+- Control flow: prefer exhaustive `match` for enum-driven behavior where it improves clarity; use `matches!` for simple boolean pattern checks and filter predicates, and do not force equivalent `match`/`if let` forms that reduce readability or trigger lint noise.
 - Naming: remove ambiguous prefixes/suffixes (for example `maybe_`, `_ref`) in favor of neutral names.
-- Structure: apply the stepdown rule (reverse topological order) to functions and types — high-level callers and dependent types at the top, their dependencies declared below them, leaf/helper items lowest; maintain call-hierarchy ordering when moving/extracting.
 - Place local helper types and validators lower in the file when they are implementation details of a specific flow.
-- Keep constants, switch/mode enums, and defaults above the items they configure, even under the stepdown rule.
-- Type layout: keep each type declaration contiguous with its own impl blocks; avoid interleaving impls for different types.
-- State/invariants: remove silent fallbacks and redundant mirrored state where invariants can be explicit.
-- Comments: keep only concise intent comments for non-obvious logic.
 
 5. Validate behavior preservation.
 - Confirm no unintended API or semantic changes.
+- Audit every touched module against the Baseline conventions — especially the stepdown order (callers before their dependencies; constants, modes, and defaults above).
 - Re-check diagnostics in edited files.
 - Run targeted build/check only when needed or requested.
 
@@ -104,8 +100,8 @@ Apply these conventions from the target repository instructions and local code p
 
 ## Decision Points
 
-- If the file has an established local style that conflicts with generic rules:
-  prefer local style unless it creates correctness or maintenance risk.
+- If the file has an established local style that conflicts with the Baseline conventions:
+  prefer local style unless it creates correctness or maintenance risk. Declaration order is not such a local convention — apply the stepdown rule unless repository instructions explicitly require a different order.
 - If a style change risks behavior (event ordering, invariants, boundary conversions):
   preserve behavior first; narrow to safe transformations.
 - If the request is style-only:
