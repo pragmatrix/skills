@@ -17,6 +17,7 @@ Personal collection of agent skills for GitHub Copilot and compatible coding age
 | [`commit`](./commit/) | user-invoked | Split a dirty working tree into logical, scope-prefixed commits with format/test gates. |
 | [`pr`](./pr/) | user-invoked | Commit outstanding work, run gates, and open/update a GitHub PR via `gh`. |
 | [`finalize-pr`](./finalize-pr/) | user-invoked | Full finalize flow: commit, rebase, review, gates, then open/update the PR. |
+| [`pr-threads`](./pr-threads/) | model-invoked | List a GitHub PR's review threads with their resolution state, and resolve them. |
 | [`rust-code-review`](./rust-code-review/) | user-invoked | Severity-ordered Rust code review with file/line evidence. |
 | [`preview`](./preview/) | model-invoked | Preview pending changes (unstaged, staged, unpushed) as type-change and integration diagrams before reading the diff. |
 | [`review`](./review/) | user-invoked | Any-language code review: loads the matching review skill and shared standards, audits comments and tests, severity-ordered findings. |
@@ -30,7 +31,8 @@ Some skills delegate to others and expect them to be installed:
 - `grill-me`, `grill-with-docs` → `grilling`
 - `grill-with-docs` → `domain-modeling`
 - `pr` → `commit`
-- `finalize-pr` → `commit`, `pr`, `review` (+ `rust-code-style` for style refactors)
+- `finalize-pr` → `commit`, `pr`, `review`, `pr-threads` (+ `rust-code-style` for style refactors)
+- `update-pr` → `pr-threads`
 - `review` → the matching review skill for the language (`rust-code-review` for Rust) and the shared standards instruction file
 
 ## Installation

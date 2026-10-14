@@ -33,6 +33,7 @@ Use when the request includes anything like:
    - Summarize from memory what changed in this session — the areas worked on and the outcome, at the level of detail the ticket's audience cares about (see step 4). Don't query the session store; use what you remember from the conversation.
    - Keep it short: a few bullet points.
    - Fold in any optional user notes.
+   - Open review threads are still-open items; on GitHub, list them with the **pr-threads** skill.
    - If nothing worth noting is committed, stop and don't post — tell the user there's nothing to report.
 
 3. **Check for uncommitted changes (gate).**

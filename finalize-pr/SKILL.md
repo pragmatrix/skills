@@ -91,6 +91,7 @@ Pause at the review step and wait for the user's direction before creating the P
    - Structure the PR/MR body with H2 (`##`) headings in this order: `## Why`, `## Summary`, `## Validation`. `Why` must explain the concrete user need, defect, constraint, or operational problem that motivates the change; do not merely restate what the diff does. Link relevant issues, ADRs, or upstream PRs when available.
    - End the PR/MR body with the AI-assistance disclosure, and never name a model, model type, or vendor in the body or title — see the **pr** skill for the exact block and its placement.
    - Confirm the PR was created/updated successfully; do **not** merge on your own.
+   - On an existing GitHub PR, report its open review threads, listed with the **pr-threads** skill.
    - Present the optional next steps and wait for direction: enable host-specific auto-merge so the PR/MR merges once CI passes, and/or clean up the branch.
 
 9. **Merge (optional, only on explicit request).**
