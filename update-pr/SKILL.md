@@ -56,7 +56,7 @@ Use when the request includes anything like:
      <unfinished / deferred / in-progress items, stated plainly; or omit this section if none>
 
      > [!NOTE]
-     > This was created entirely with AI assistance.
+     > This was created with AI assistance.
      ```
    - **If this skill was already used earlier in the session**, don't draft a full duplicate — check the PR comment thread for a prior update comment and draft only the *updates* since then, so the thread stays concise.
 

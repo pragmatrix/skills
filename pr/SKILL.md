@@ -56,7 +56,7 @@ Do not use when the user wants a rebase or a code review as part of the workflow
    - **When multiple PRs exist (submodule and parent), reference the submodule PRs from the parent's PR body.** Add a `## Submodule PRs` H2 section listing each affected submodule, its branch, and its PR link (e.g. `- mylib@branch: <url>`), placed so reviewers can see the dependent changes. The submodule's own PR body must not mention the parent project in return (see step 2).
    - **End the PR/MR body with the AI-assistance disclosure**, as the last element of the body (the title carries nothing):
      > [!NOTE]
-     > This was created entirely with AI assistance.
+     > This was created with AI assistance.
    - Never name a model, model type, or vendor anywhere in the PR/MR body or title.
    - Structure the body with H2 (`##`) headings in this order: `## Why` (the rationale explaining why the change is needed), then `## Summary`, then optional further H2 sections when they improve reviewability (e.g. `## Validation`, `## Submodule PRs`).
    Author the body in a temp file and pass it through `--body-file` for `gh` or `--description-file` for `glab` so the body is passed reliably.
