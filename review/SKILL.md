@@ -19,7 +19,7 @@ Use a style skill only to name a style finding and point at the convention — d
 
 ## Comment Audit
 
-Audit the comments of every added or modified line — new comments, changed comments, and the comments left untouched around them — plus the code they describe, against the comment rules of the shared standards (for Rust, the **Comments** section of `rust-standards.instructions.md`): visible why, brevity (with its exceptions), no restatement, no contrast with an absent design, deliberate history kept. The shared wording defines each axis and the exemptions; report any non-satisfied axis per `path:line`, with the suggested short replacement or deletion text. Keep the severity low unless the missing why hides a real hazard (then say what breaks).
+Audit the comments of every added or modified line — new comments, changed comments, and the comments left untouched around them — plus the code they describe, against the comment rules of the shared standards (for Rust, the **Comments** section of `rust-standards.instructions.md`), which define every rule and its exemptions; report each violation per `path:line`, with the suggested short replacement or deletion text. Keep the severity low unless the missing why hides a real hazard (then say what breaks).
 
 ## Test Audit
 

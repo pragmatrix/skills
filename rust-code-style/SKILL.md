@@ -65,7 +65,7 @@ Apply these conventions from the target repository instructions and local code p
 - In tests, keep test cases before helpers.
 - Order items by the stepdown rule (reverse topological order): callers and dependent types first, the functions/types they depend on declared below them, leaf/helper items lowest.
 - Exception to the stepdown rule: constants, mode/switch enums, and defaults go above the functions and types they are defined for — readers meet the policy values before the code that selects on them.
-- Use concise, intent-focused comments only when logic is non-obvious.
+- Write and rewrite comments per the **Comments** section of `~/.copilot/instructions/rust-standards.instructions.md`.
 
 ## Procedure
 

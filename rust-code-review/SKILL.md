@@ -15,7 +15,7 @@ Produce a review that:
 - Lists findings first, ordered by severity
 - Focuses on correctness, behavioral regressions, and test additions before style
 - Flags entangled designs (complecting) when it has a real change, debug, or policy cost
-- Audits the comments on changed lines: short, why-focused, no restatement of the code
+- Audits the comments on changed lines against the shared Rust standards
 - Audits added or changed tests against the opt-in test policy, including flagging unrequested tests
 - Reports style/convention issues only when they have clear correctness or maintenance impact
 - Delegates style refactoring work to the rust-code-style skill
@@ -70,9 +70,7 @@ If scope is missing, ask for it.
 - Prefer `then()` / `then_some()` for concise conditional `Option` construction when it keeps intent clear.
 - Extract long closures (roughly more than five statements) that contain real logic into a named function placed next to its wrapper, leaving the closure body as a single call.
 - Flag designs that braid independent concerns together — state with value/time, types with implementation, policy with execution structure, timing/location with the caller — when disentangling them would localize a change, a bug, or a policy edit. Judge the artifact's changeability, not the authoring convenience, and say when the complexity is inherent instead of incidental.
-- Audit comments on the changed lines and their surroundings against three axes: every comment must be very short, must not restate what the code plainly shows, and must make the why of the change visible. Flag a missing why, an over-long comment, and superfluous description, each with `path:line` and suggested replacement or deletion text. Brevity has open exceptions: a genuinely complicated subject — an involved algorithm, a subtle invariant, a workaround — may keep a longer comment when every sentence states a why; name such comments as exempt instead of reporting them.
-- Flag a comment that contrasts the code with a design not visible at that spot ("owned outright rather than mutex-guarded", "a compile error instead of a runtime check"): it explains the change, not the code. Give the rewritten text stating the reason. Do not flag deliberate history or open notes — a dated measurement, a rejected alternative, a `TODO` or `Architecture:` question each carry a reason. Only a comment whose content is merely that the code changed ("previously X", "replaces the old ...") is a finding.
-- The user explicitly requests concise rationale comments for non-obvious behavior, invariants, coordinate conversions, and architectural constraints without a per-task request. Verify relevant rationale is preserved or updated when commented code changes, preferably in one line; flag its unexplained removal.
+- Load the **Comments** section of `~/.copilot/instructions/rust-standards.instructions.md` and audit the comments on the changed lines, their surroundings, and every newly added item against each of its rules. Report each violation with `path:line` and the suggested replacement, new, or deletion text; name comments exempt from brevity instead of reporting them.
 
 5. Evaluate error handling and boundary conversions.
 - Prefer explicit errors over defensive fallbacks for unexpected states.
@@ -90,7 +88,7 @@ If scope is missing, ask for it.
 7. Prepare final review output.
 - Findings first, severity ordered: Critical, High, Medium, Low. Number each item `<section>.<n>` per the template.
 - For each finding include: problem, impact, evidence, and minimal fix direction.
-- Include a comment audit section for the changed lines: missing why, over-long comments, and superfluous restatement, with suggested short text.
+- Include a comment audit section for the changed lines, with suggested text for each violation.
 - Include a test audit section: each unrequested test that re-checks ordinary behavior (recommend deletion), each kept test with the non-obvious semantics it explains, and any required missing test.
 - If no findings, state that explicitly and note residual risks or testing gaps.
 
@@ -106,14 +104,8 @@ If scope is missing, ask for it.
   report a Low-severity finding and direct extraction into a named function next to its wrapper.
 - If requested behavior is ambiguous:
   ask one targeted clarifying question, then continue.
-- If a comment does not make its why visible, is longer than a sentence or two, or restates the code:
-  report a Low-severity finding and give the shorter replacement text or say to delete it.
-- If a comment contrasts the code with a design that is not visible at that spot:
-  report a Low-severity finding and give the rewritten text stating the reason. Deliberate history and open notes (dated measurements, rejected alternatives, `TODO`/`Architecture:` questions) are not this; leave them.
-- If a comment's only content is that the code changed:
-  report a Low-severity finding; that record belongs in git and the ADR, not in the code.
-- If a comment is long because its subject is genuinely complicated:
-  leave it, list it as an exempt exception, and require only that each sentence carries a why.
+- If a comment violates a rule of the shared standards:
+  report a Low-severity finding, unless the missing why hides a real hazard (then say what breaks). A comment that is long because its subject is genuinely complicated is exempt; list it as such.
 - If an added test re-checks ordinary behavior, mirrors neighbouring tests, or restates the implementation:
   report a Low-severity finding to delete it, unless the brief asked for tests or it pins down counter-intuitive semantics.
 - If changed behavior is counter-intuitive or the brief asked for coverage and nothing pins it down:
@@ -126,8 +118,7 @@ Mark review complete when all are true:
 - Findings are severity-ordered and evidence-based
 - Major regression and invariant risks were checked
 - Added and changed tests were audited against the opt-in policy: each is requested by the brief or pins down counter-intuitive semantics, and unrequested tests were flagged
-- Comments on changed lines were audited for a visible why, brevity, and no restatement
-- Any comment exempt from brevity was named with its reason
+- Comments on changed lines were audited against the shared Comments rules, and exempt comments were named
 - Residual risks/assumptions are called out
 
 ## Review Output Template
