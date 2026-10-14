@@ -46,7 +46,7 @@ Apply these conventions from the target repository instructions and local code p
 - Use common-root imports with at most one level of brace nesting (module or item).
 - Flatten any deeper nested `use` brace trees; do not preserve deeper nesting even when nearby code uses it.
 - Prefer qualified enum variants when that improves clarity.
-- Default to `pub`; use `pub(crate)` only when containing module is crate-public.
+- Write plain `pub` and let the module declaration bound visibility; rewrite `pub(crate)`/`pub(super)` to `pub` unless the item sits in a `pub mod` and must stay out of the external API.
 - Prefer adding fields to existing structs over parallel data structures.
 - Extract a named argument type when the same coherent combination of inputs recurs across functions; do not bundle unrelated or one-off arguments just to shorten a signature.
 - Prefer constructor functions and derive helpers for newtypes.
