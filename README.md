@@ -7,7 +7,7 @@ Personal collection of agent skills for GitHub Copilot and compatible coding age
 | Skill | Kind | Description |
 |---|---|---|
 | [`grill-me`](./grill-me/) | user-invoked | Entry point for a grilling session about a plan or design. |
-| [`grill-me-ask`](./grill-me-ask/) | user-invoked | Settle a plan's decisions fast: one-way doors asked in batched AskUserQuestion rounds, two-way doors auto-resolved, all recorded in a decision ledger. |
+| [`grill-me-ask`](./grill-me-ask/) | user-invoked | Settle a plan's decisions fast: one-way doors asked in batched question rounds, two-way doors auto-resolved, all recorded in a decision ledger. |
 | [`grill-with-docs`](./grill-with-docs/) | user-invoked | Grilling session that also builds domain docs (`CONTEXT.md`, ADRs) as you go. |
 | [`grilling`](./grilling/) | model-invoked | The reusable interview primitive: relentless, frontiere-based questioning until every decision is settled. |
 | [`domain-modeling`](./domain-modeling/) | model-invoked | Actively build and sharpen a project's domain model; update glossary and ADRs inline. |
