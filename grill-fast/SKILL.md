@@ -20,6 +20,8 @@ Format a round like so:
 📒 **Settled since last round**
 - <decision>: <choice> (auto|fact): <short reason>
 
+⚠️ <critical risk or dependency>
+
 ❓ **Q1** - **<question title>**: <the decision and its context>
 
 - ➡️ **a) <recommended option>**: <why it wins _here_>
@@ -34,7 +36,7 @@ Format a round like so:
 - The 📒 block lists every ledger entry settled without the user since the previous round, so each auto or fact decision is visible the round it is made. Omit the block only when there are none.
 - Gather facts before writing options: look them up yourself or via a background sub-agent; ask the user only for decisions. Only questions downstream of a running lookup wait for it.
 - A decision with one clearly dominant option is a fact: record it, do not ask.
-- Before the round, state in a line any critical risk or dependency.
+- The ⚠️ line states any critical risk or dependency for the round. Omit it only when there is none.
 - Options are as many genuine alternatives as the decision has (two or more), with short, distinguishable labels, lettered so the user can answer tersely (`Q1 b`). Write them as list items: renderers strip leading spaces, so plain indented lines collapse into the question. The recommended one is always `a)`, marked ➡️; the others are marked 🔸.
 - When the remaining frontier holds only clear recommendations, ask once: accept the remaining ➡️ options?
 
@@ -44,4 +46,4 @@ One line per settled decision: choice, a short reason, and how it was settled (u
 
 ## Done
 
-Done when every one-way door is settled by the user and every two-way door is in the ledger. Present the full ledger and act only after the user confirms it.
+Done when every one-way door is settled by the user or as a fact, and every two-way door is in the ledger. Present the full ledger and act only after the user confirms it.
