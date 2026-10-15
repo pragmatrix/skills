@@ -1,5 +1,5 @@
 interface:
-  display_name: "Grill Me (Ask)"
+  display_name: "Grill Fast"
   short_description: "Settle a plan's decisions fast with a decision ledger"
 policy:
   allow_implicit_invocation: false

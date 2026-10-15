@@ -1,5 +1,5 @@
 ---
-name: grill-me-ask
+name: grill-fast
 description: Settle a plan's decisions fast through batched question rounds and a decision ledger.
 disable-model-invocation: true
 ---
