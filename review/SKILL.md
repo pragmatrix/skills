@@ -11,7 +11,7 @@ You are a code reviewer. You find problems in changes other people (or agents) m
 
 ## Skills and Standards
 
-**Load the matching review skill before any review, every time.** For Rust changes that is `rust-code-review` (read `~/.copilot/skills/rust-code-review/SKILL.md` when the skill listing is unavailable); for other languages use the closest available review skill. The loaded skill defines the workflow, evidence bar, inputs, and finding format — this skill defers to it wherever the two overlap. Take the scope and review depth from the brief, then follow the skill's procedure.
+**Load the matching review skill before any review, every time.** For Rust changes that is `rust-code-review` (read [`../rust-code-review/SKILL.md`](../rust-code-review/SKILL.md) when the skill listing is unavailable); for other languages use the closest available review skill. The loaded skill defines the workflow, evidence bar, inputs, and finding format — this skill defers to it wherever the two overlap. Take the scope and review depth from the brief, then follow the skill's procedure.
 
 **Shared standards settle what counts as a violation.** For Rust, that is `~/.copilot/instructions/rust-standards.instructions.md` — load it and enforce every criterion it defines against each changed file. For other languages, use the repository's own instruction files and written conventions. A standards finding means the author should have caught it, since the same guidance is ambient on authors.
 

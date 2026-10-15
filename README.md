@@ -39,11 +39,7 @@ Some skills delegate to others and expect them to be installed:
 
 ## Installation
 
-Clone or copy the skills into your agent's skills directory, e.g. for GitHub Copilot:
-
-```
-~/.copilot/skills/
-```
+Clone or copy the skills into your agent's user-level skills directory.
 
 Each skill lives in its own folder with a `SKILL.md`; user-invoked skills are reachable as slash commands (e.g. `/grill-me`).
 

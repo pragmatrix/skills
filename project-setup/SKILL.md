@@ -65,7 +65,7 @@ If the crate type or location is missing, ask for it.
 - Keep authoring rules always-on; do not strip them just because a review skill overlaps. The overlap is intentional: the reviewer verifies the author followed the rules.
 
 6. Keep skills global, not per-repo.
-- For generic skills (code review, code style), reference the global ones in `~/.copilot/skills/` rather than duplicating them in the repo.
+- For generic skills (code review, code style), reference the globally installed ones by name rather than duplicating them in the repo.
 - Only create repo-level skills for genuinely project-specific workflows.
 
 ## Decision Points

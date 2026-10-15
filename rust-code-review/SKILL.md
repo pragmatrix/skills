@@ -7,7 +7,7 @@ user-invocable: true
 
 # Rust Code Review
 
-**Load `code-review-core` first** (read `~/.copilot/skills/code-review-core/SKILL.md` when the skill listing is unavailable) and follow its procedure, decision points, completion criteria, and output template. This skill binds it to Rust.
+**Load `code-review-core` first** (read [`../code-review-core/SKILL.md`](../code-review-core/SKILL.md) when the skill listing is unavailable) and follow its procedure, decision points, completion criteria, and output template. This skill binds it to Rust.
 
 Use rust-code-style when the request is to actively refactor code style.
 
