@@ -34,7 +34,7 @@ Use when the request includes anything like:
    - Keep it short: a few bullet points.
    - Fold in any optional user notes.
    - Open review threads are still-open items; on GitHub, list them with the **pr-threads** skill.
-   - If nothing worth noting is committed, stop and don't post — tell the user there's nothing to report.
+   - A session's outcome is committed changes, verification results the PR's readers can check (an audit run, a test or benchmark result, a confirmation that the branch fixes or is unaffected by an issue), or both. If the session has neither, stop and don't post — tell the user there's nothing to report.
 
 3. **Check for uncommitted changes (gate).**
    - Run `git status --short`. If the working tree is dirty, ask the user whether it's OK to proceed before drafting anything. If the user declines, stop.
