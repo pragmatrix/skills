@@ -21,8 +21,8 @@ import tempfile
 import textwrap
 import urllib.request
 
-# YouTube's public InnerTube API key, as used by YTranscript.
-PLAYER_URL = "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
+# YTranscript appends YouTube's public InnerTube API key to this URL. The endpoint answers without it.
+PLAYER_URL = "https://www.youtube.com/youtubei/v1/player"
 IOS_CLIENT = {"clientName": "IOS", "clientVersion": "20.10.38", "hl": "en", "gl": "US"}
 IOS_USER_AGENT = "com.google.ios.youtube/20.10.38 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X)"
 LANG = "en"
