@@ -12,7 +12,7 @@ Before the first round, show the decision tree in a few lines: each expected dec
 
 ## Rounds
 
-The **frontier** is every one-way door whose prerequisites are settled. Each round asks the _independent_ frontier decisions, those that unblock the most others first, as numbered questions. Wait for the answers, recompute the frontier, repeat.
+The **frontier** is every one-way door whose prerequisites are settled. Each round asks two or three _independent_ frontier decisions as numbered questions, those that unblock the most others first. A round holds a single question only when the frontier holds a single decision. Wait for the answers, recompute the frontier, repeat.
 
 Format a round like so:
 
