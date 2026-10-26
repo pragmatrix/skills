@@ -19,6 +19,7 @@ Personal collection of agent skills for GitHub Copilot and compatible coding age
 | [`pr`](./pr/) | user-invoked | Commit outstanding work, run gates, and open/update a GitHub PR via `gh`. |
 | [`finalize-pr`](./finalize-pr/) | user-invoked | Full finalize flow: commit, rebase, review, gates, then open/update the PR. |
 | [`pr-threads`](./pr-threads/) | model-invoked | List a GitHub PR's review threads with their resolution state, and resolve them. |
+| [`youtube-summary`](./youtube-summary/) | model-invoked | Download a YouTube transcript and summarize it: notable points, action plan, critique of weak claims. |
 | [`code-review-core`](./code-review-core/) | model-invoked | Language-agnostic review procedure, audits, and output template that language review skills load. |
 | [`rust-code-review`](./rust-code-review/) | user-invoked | Severity-ordered Rust code review with file/line evidence. |
 | [`preview`](./preview/) | model-invoked | Preview pending changes (unstaged, staged, unpushed) as type-change and integration diagrams before reading the diff. |
