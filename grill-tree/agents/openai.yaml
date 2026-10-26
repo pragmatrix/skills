@@ -1,0 +1,5 @@
+interface:
+  display_name: "Grill Tree"
+  short_description: "Settle a plan's decisions over a tool-kept decision tree"
+policy:
+  allow_implicit_invocation: false
