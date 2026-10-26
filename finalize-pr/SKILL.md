@@ -65,6 +65,7 @@ Invoking this skill is the go-ahead to commit the work already in the tree (step
 4. **Review the branch.**
    - Load and follow the **review** skill, applying it to the diff `git diff <base>...HEAD`. It selects the matching per-language review skill (e.g. **rust-code-review** for Rust; detect via `git diff --name-only <base>...HEAD` for `.rs` files, treating `Cargo.toml`, `Cargo.lock`, and Rust build scripts as signals) and the shared standards for the languages involved.
    - Run the review at the chosen depth; collect findings severity-ordered (Critical, High, Medium, Low).
+   - When a subagent runs the review, put the diff range, the base commit, and the list of changed files in its brief, so it spends its time on the diff instead of on finding it.
    - Do not report missing version updates as review findings. Versioning is evaluated only in step 6, after the user has chosen how to proceed with the review.
 
 5. **Interact with the user about the review.**
