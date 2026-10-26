@@ -40,8 +40,8 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
 
 7. **Group into logical parts.** Partition the changes into coherent units — each unit is a single feature, fix, or concern. Files that belong together (implementing one behavior, or a change plus its tests) go in the same commit. Do not commit two unrelated concerns together.
 
-8. **Commit each part, one at a time.** For each logical part:
-   - Stage only the files in that part: `git add <paths>`
+8. **Commit each part, one at a time.** Before the first part, check the index with `git diff --cached --stat`. When it lists staged changes, ask the user what to do with them, because staging may mark the files they have reviewed: commit them first as their own part, fold them into the grouping by clearing the index with `git restore --staged .`, or stop the run so they can finish reviewing. Follow the answer, so nothing staged before this run rides along in a commit unasked. With an empty index, go on. For each logical part:
+   - Stage only the files in that part: `git add <paths>`, then confirm `git diff --cached --stat` lists only them.
    - If a file contains changes belonging to multiple parts, stage only its relevant hunks with **partial staging** so each commit stays coherent. Note that a file cannot be split across commits while its hunks remain unstaged elsewhere — split by hunk, keeping the whole file's hunks accounted for across the commit sequence. Use `git add -p <path>` for this, but prefer the bundled picker `hunk-pick.sh` (next to this file) when naming the hunks up front beats answering prompts, or when the sources use CRLF — it reads and writes bytes, so the patch keeps the file's line endings, which a text-mode patch does not:
    - `<skill-dir>/hunk-pick.sh --list <path>` — number the hunks
    - `<skill-dir>/hunk-pick.sh <path> 1 3 > "$TMPDIR/pick.patch"` — keep hunks 1 and 3
