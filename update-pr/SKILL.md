@@ -27,7 +27,7 @@ Use when the request includes anything like:
 1. **Check the basics.**
    - Pick the CLI: `gh` for GitHub, `glab` for GitLab. Invoke it directly when inspecting or posting to the PR; report an availability or authentication failure only if that operation fails.
    - Get the current branch: `git branch --show-current`.
-   - Confirm the branch has an open PR (`gh pr view <branch>` / `glab mr view <branch>`). If there's no PR, stop and tell the user — don't create one (use the `pr` skill for that).
+   - Confirm the branch has an open PR (`gh pr view <branch>` / `glab mr view <branch>`). These look only in `origin`'s repo, so a PR opened from a fork lives elsewhere: when `git remote -v` lists an `upstream` remote, also search it (`gh pr list --repo <upstream owner/name> --head <branch>` / `glab mr list --repo <upstream owner/name> --source-branch <branch>`). Use the repo where the PR was found for every later `gh`/`glab` call. If neither repo has a PR, stop and tell the user — don't create one (use the `pr` skill for that).
 
 2. **Recall what we did this session.**
    - Summarize from memory what changed in this session — the areas worked on and the outcome, at the level of detail the ticket's audience cares about (see step 4). Don't query the session store; use what you remember from the conversation.
@@ -64,7 +64,7 @@ Use when the request includes anything like:
    - Show the user the full comment text and ask for approval before posting. Do not post until they approve; if they request changes, revise and re-show until approved. If the user declines to post, stop.
 
 6. **Post the comment.**
-   - Post the content as a new comment on the PR. Use `gh pr comment <pr> --body-file <file>` (or `glab mr note <mr> --message <file>`), building the body in a temp file.
+   - Post the content as a new comment on the PR. Use `gh pr comment <pr> --body-file <file>` (or `glab mr note <mr> --message <file>`), adding `--repo <owner/name>` when the PR lives in the upstream repo, and building the body in a temp file.
    - Confirm the comment was posted and report the URL the command prints.
 
 7. **Wrap up.**
