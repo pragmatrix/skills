@@ -14,6 +14,8 @@ Create the `docs/adr/` directory lazily: only when the first ADR is needed.
 
 That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why*, not in filling out sections.
 
+Source every reason: it is what the user said, or what the code, docs, or a lookup you name show. When the context cites how other tools or users behave, name where that comes from, or ask the user before writing it as fact.
+
 ## Optional sections
 
 Only include these when they add genuine value. Most ADRs won't need them.
