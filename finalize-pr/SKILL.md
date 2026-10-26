@@ -87,9 +87,7 @@ Pause at the review step and wait for the user's direction before creating the P
    - Only proceed to the PR step if formatting and the current project's tests are green; otherwise fix, re-run the **commit** skill, and re-run the checks. Record foreign-project test failures as residual risks instead of changing unrelated projects.
 
 8. **Create or update the PR/MR.**
-   - Follow the **pr** skill's host-specific creation/update procedure: use `gh pr` for GitHub or `glab mr --repo <group/project>` for GitLab. The **pr** skill owns the shared mechanics; reuse it here rather than duplicating the steps.
-   - Structure the PR/MR body with H2 (`##`) headings in this order: `## Why`, `## Summary`, `## Validation`. `Why` must explain the concrete user need, defect, constraint, or operational problem that motivates the change; do not merely restate what the diff does. Link relevant issues, ADRs, or upstream PRs when available.
-   - End the PR/MR body with the AI-assistance disclosure, and never name a model, model type, or vendor in the body or title — see the **pr** skill for the exact block and its placement.
+   - **Draft, approve, post** exactly as the **pr** skill's step 4: its title and body rules (including no mention of the parent in a submodule PR) and the user's approval of the exact text before `gh pr create`/`edit` or `glab mr create`/`update`. Done when the posted text is the approved text.
    - Confirm the PR was created/updated successfully; do **not** merge on your own.
    - On an existing GitHub PR, report its open review threads, listed with the **pr-threads** skill.
    - Present the optional next steps and wait for direction: enable host-specific auto-merge so the PR/MR merges once CI passes, and/or clean up the branch.
@@ -137,7 +135,7 @@ Mark the skill complete when all of the current request's steps are true:
 - Every behavioral change in the branch bumped the version by at least a patch increment, committed with the change
 - The formatting check (e.g. `cargo fmt -- --check`) passed cleanly before creating/updating the PR
 - The current project's full test suite passed before creating/updating the PR; foreign-project suites were excluded
-- The PR/MR body explains the rationale in a `Why` section and links relevant context when available
+- The PR/MR body opens with a `## Why` pitch per the **pr** skill's step 4 and links relevant context when available
 - A PR exists for the branch (created or updated) reflecting the final state
 - If auto-merge was requested: auto-merge was enabled for the PR
 - If branch cleanup was requested: the branch was deleted on GitHub, the base branch was checked out and pulled, the local branch was deleted, and any worktree named after the branch was removed

@@ -58,7 +58,11 @@ Do not use when the user wants a rebase or a code review as part of the workflow
      > [!NOTE]
      > This was created with AI assistance.
    - Never name a model, model type, or vendor anywhere in the PR/MR body or title.
-   - Structure the body with H2 (`##`) headings in this order: `## Why` (the rationale explaining why the change is needed), then `## Summary`, then optional further H2 sections when they improve reviewability (e.g. `## Validation`, `## Submodule PRs`).
+   - Structure the body with H2 (`##`) headings in this order: `## Why`, `## Summary`, then optional further H2 sections when they improve reviewability (e.g. `## Details`, `## Validation`, `## Submodule PRs`).
+   - **`## Why` is the pitch: at most three short sentences**, readable in ten seconds. Name the problem (the concrete need, defect, constraint, or operational problem) and what it costs, and link only where the problem is reported, such as an issue or an upstream PR. The test: a reviewer who reads only `## Why` knows what was wrong.
+   - **`## Summary` opens with the link to the ADR that records the decision**, when there is one, since the ADR answers the problem rather than stating it.
+   - **Detail goes into `## Details`**, after `## Summary`: the mechanism behind the problem, measurements, history, and alternatives weighed. Write it only when a reviewer needs it to judge the change and no linked ADR or issue already says it.
+   - Source every reason in `## Why` and `## Details`: it is what the user said in the session, or what the code, docs, or linked issues show. A reason you inferred yourself, such as what users expect or how other tools behave, stays out unless the user confirms it.
    Author the body in a temp file and pass it through `--body-file` for `gh` or `--description-file` for `glab` so the body is passed reliably.
    - Confirm the PR was created/updated successfully. This is the skill's end state by default — do **not** merge on your own.
 
