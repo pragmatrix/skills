@@ -34,7 +34,7 @@ Pause at the review step and wait for the user's direction before creating the P
 
 - Branch (default: current branch via `git branch --show-current`).
 - Base branch (default: derive from `git`/`gh`; common defaults are `master` or `main` — fall back to the branch that HEAD diverged from, or ask if ambiguous).
-- Review depth: quick or thorough. Default quick unless the diff is behavior-critical (state transitions, event ordering, protocol boundaries) — then suggest thorough.
+- Review depth: quick or thorough. Default quick. When the diff is behavior-critical (state transitions, event ordering, protocol boundaries), ask the user whether to review it thorough instead, and run thorough only on their yes.
 
 ## Procedure
 
@@ -117,7 +117,7 @@ Invoking this skill is the go-ahead to commit the work already in the tree (step
 - If the base branch is ambiguous: ask which base to diff against and target.
 - If the working tree is dirty: run the **commit** skill to commit outstanding work before reviewing.
 - If submodules are affected: finalize each affected submodule's PR first (recursively) before the parent, so the parent's pointer bump references an already-PR'd commit.
-- If the diff is behavior-critical: recommend a thorough review before the user decides.
+- If the diff is behavior-critical: ask whether to review thorough. Without a yes, the review stays quick.
 - If the diff contains a behavioral change without a version bump: apply the patch (or larger) bump per step 6 before the PR, and ask the user only when it is unclear whether the change is behavioral.
 - If the user picks "fix issues first": commit the fixes with the **commit** skill, loop back to reviewing until findings are resolved or accepted, then continue through the full test run and PR step.
 - If findings are style-only and a refactor is wanted: hand off to **rust-code-style** (via the **review** skill's style-refactor path when applicable).
