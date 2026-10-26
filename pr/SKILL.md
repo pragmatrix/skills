@@ -31,6 +31,8 @@ Do not use when the user wants a rebase or a code review as part of the workflow
 
 ## Procedure
 
+Invoking this skill is the go-ahead to commit the work already in the tree. Every change made during the run (formatting or test fixes) is shown to the user and committed only once the user says to commit.
+
 1. **Confirm prerequisites.**
    - Inspect `git remote -v` to determine whether the repository is hosted on GitHub or GitLab.
    - Invoke the matching host CLI directly when creating or inspecting the PR. If it is unavailable or authentication fails, report that failure then.

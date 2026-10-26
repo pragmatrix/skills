@@ -38,6 +38,8 @@ Pause at the review step and wait for the user's direction before creating the P
 
 ## Procedure
 
+Invoking this skill is the go-ahead to commit the work already in the tree (step 2). Every change made during the run (review fixes, formatting fixes, version bumps) is shown to the user and committed only once the user says to commit.
+
 1. **Establish scope.**
    - Inspect `git remote -v` to determine whether the repository is hosted on GitHub or GitLab.
    - Invoke the matching host CLI directly when creating or inspecting the PR. If it is unavailable or authentication fails, report that failure then.
@@ -70,7 +72,7 @@ Pause at the review step and wait for the user's direction before creating the P
      - **Fix issues first** — you address findings, then re-run the review before continuing.
      - **Proceed anyway** — open the PR with known findings (e.g., minor/acceptable risk).
      - **Hold** — stop before any PR.
-   - If the user chooses to fix, apply edits, then run the **commit** skill to commit the review changes before proceeding.
+   - If the user chooses to fix, apply the edits, report them, and ask to commit. Run the **commit** skill once the user says to commit.
    - If findings are style-only and a refactor is wanted, hand off to **rust-code-style** (referenced by the **review** skill for Rust style work).
    - Do not create or update the PR until the user has explicitly approved proceeding.
 
