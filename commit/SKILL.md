@@ -38,7 +38,7 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
    Two screening traps observed in practice:
    - **Untracked directories that contain nested git repos** (`dir/.git` file pointing elsewhere, no gitlink in the index) show up as one `??` path; `git add .` pulls in their entire vendored contents (thousands of files). Never bulk-add them; check `git ls-tree HEAD <path>` (already tracked?), whether the tree duplicates already-tracked paths elsewhere, and diff the copies before committing anything.
 
-7. **Group into logical parts.** Partition the changes into coherent units — each unit is a single feature, fix, or concern. Files that belong together (implementing one behavior, or a change plus its tests) go in the same commit. Do not commit two unrelated concerns together.
+7. **Group into logical parts.** Partition the changes into coherent units — each unit is a single feature, fix, or concern. Files that belong together (implementing one behavior, or a change plus its tests) go in the same commit. Do not commit two unrelated concerns together. Fixes made in this session for review findings, such as those applied with the `handle-reviews` skill or in `finalize-pr`'s review step, form parts of their own, apart from any other work.
 
 8. **Commit each part, one at a time.** Before the first part, check the index with `git diff --cached --stat`. When it lists staged changes, ask the user what to do with them, because staging may mark the files they have reviewed: commit them first as their own part, fold them into the grouping by clearing the index with `git restore --staged .`, or stop the run so they can finish reviewing. Follow the answer, so nothing staged before this run rides along in a commit unasked. With an empty index, go on. For each logical part:
    - Stage only the files in that part: `git add <paths>`, then confirm `git diff --cached --stat` lists only them.
@@ -50,6 +50,7 @@ Create clear, reviewable history from a dirty working tree by splitting changes 
    - After staging a split file, read `git diff --cached` once to confirm only the intended hunks are in it — a hunk boundary can carry an unrelated line (a stray blank line, a reformat) into the commit.
    - Write a **single-line** message summarizing the change in imperative mood — a subject only, never a body. Keep the subject under ~100 characters; do not pad it with long technical explanations.
    - Always prefix the message with the scope: `prefix: summary`, where `prefix` is in kebab-case (e.g. `mt: ...`, `parser: ...`, `cli-shell: ...`) and names the subproject or area the change is scoped to.
+   - End the subject of a part that only fixes review findings with ` (review-fix)`, e.g. `parser: reject empty input (review-fix)`. The review-on-push hook skips such commits, so a review never reviews the fixes of another review. A part with any other change gets no tag, so that change still gets reviewed.
    - Never add a trailer, attribution line, or AI-assistance disclosure such as `Assisted-by`, `AI-Assisted`, or `Co-authored-by` — the message is exactly the one-line subject.
    - Commit: `git commit -m "<prefix>: <summary>"` — a single `-m` carrying only the subject.
    - Move to the next logical part.

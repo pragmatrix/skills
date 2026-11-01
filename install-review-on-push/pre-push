@@ -43,6 +43,18 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         case " $pushed " in *" $commit "*) ;; *) pushed="$pushed $commit" ;; esac
     done
 done
+
+# A commit whose subject ends in "(review-fix)" only applies the findings of an
+# earlier review. The commit skill writes that tag. Reviewing such a commit
+# would review a review, so the hook leaves it out and reviews go one level deep.
+kept=
+for commit in $pushed; do
+    case $(git log -1 --format=%s "$commit") in
+    *'(review-fix)') ;;
+    *) kept="$kept $commit" ;;
+    esac
+done
+pushed=$kept
 [ -n "$pushed" ] || exit 0
 
 top=$(git rev-parse --show-toplevel) || exit 0
