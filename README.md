@@ -24,6 +24,7 @@ Personal collection of agent skills for GitHub Copilot and compatible coding age
 | [`rust-code-review`](./rust-code-review/) | user-invoked | Severity-ordered Rust code review with file/line evidence. |
 | [`preview`](./preview/) | model-invoked | Preview pending changes (unstaged, staged, unpushed) as type-change and integration diagrams before reading the diff. |
 | [`review`](./review/) | user-invoked | Any-language code review: loads the matching review skill and shared standards, audits comments and tests, severity-ordered findings. |
+| [`install-review-on-commit`](./install-review-on-commit/) | user-invoked | Install a post-commit hook that reviews each commit in a read-only background Claude Code run and messages the findings to the open Claude sessions. |
 | [`rust-code-style`](./rust-code-style/) | user-invoked | Behavior-preserving Rust style refactors aligned to repository conventions. |
 | [`project-setup`](./project-setup/) | user-invoked | Scaffold a Rust workspace with tooling conventions and the three-layer AI instruction architecture. |
 
@@ -37,6 +38,7 @@ Some skills delegate to others and expect them to be installed:
 - `finalize-pr` → `commit`, `pr`, `review`, `pr-threads` (+ `rust-code-style` for style refactors)
 - `update-pr` → `pr-threads`
 - `review` → the matching review skill for the language (`rust-code-review` for Rust) and the shared standards instruction file
+- `install-review-on-commit` → `review` (the hook runs `/review` on each commit)
 - `rust-code-review` → `code-review-core`
 
 ## Installation
