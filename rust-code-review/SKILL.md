@@ -13,7 +13,7 @@ Use rust-code-style when the request is to actively refactor code style.
 
 ## Bindings
 
-- **Shared standards**: `~/.copilot/instructions/rust-standards.instructions.md`. Its **Comments** section is the comment rules of step 4, and its **Derive each result once** rule backs the repeated-derivation check of step 3.
+- **Shared standards**: [`rust-standards.instructions.md`](rust-standards.instructions.md), next to this file. Its **Comments** section is the comment rules of step 4, and its **Derive each result once** rule backs the repeated-derivation check of step 3.
 - **Style skill**: rust-code-style.
 - **Scope**: the changed Rust files.
 
