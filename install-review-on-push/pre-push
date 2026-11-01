@@ -1,0 +1,115 @@
+#!/bin/sh
+
+# review-on-push pre-push hook.
+#
+# Reviews the commits a push sends, together as one change, with the `review`
+# skill in a headless Claude Code run, but only while an interactive Claude
+# Code session is open in this worktree, or in a superproject directory that
+# contains it. The run starts in the background, so the push goes through at
+# once. The run is read-only: it gets the file reading tools and Bash limited
+# to read-only git commands. Don't-ask mode denies reads outside the working
+# directories, so the skills and the shared instructions the review reads are
+# added as directories. It messages its findings to the open sessions, which
+# handle them with the handle-reviews skill, and ends. Its final answer, the
+# findings, goes to .git/review-on-push/<sha>.log. Runs are named review-<sha>,
+# and the hook never counts them as open sessions.
+
+command -v claude >/dev/null 2>&1 || exit 0
+command -v jq >/dev/null 2>&1 || exit 0
+
+# The commits the push sends that no remote branch holds yet, newest first.
+# Git passes one line per pushed ref on stdin.
+pushed=
+while read -r local_ref local_sha remote_ref remote_sha; do
+    # Deleting a branch or pushing a tag sends no commits to review.
+    case "$local_sha" in *[!0]*) ;; *) continue ;; esac
+    case "$remote_ref" in refs/heads/*) ;; *) continue ;; esac
+    new=$(git rev-list "$local_sha" --not --remotes)
+    # After a rebase, a commit with a new id may carry the same changes as one
+    # the remote branch already has. Those were reviewed before, so only the
+    # commits that git cherry marks as new to the old remote branch remain.
+    case "$remote_sha" in *[!0]*)
+        if git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
+            changed=$(git cherry "$remote_sha" "$local_sha" | sed -n 's/^+ //p')
+            kept=
+            for commit in $new; do
+                printf '%s\n' "$changed" | grep -qx "$commit" && kept="$kept $commit"
+            done
+            new=$kept
+        fi
+        ;;
+    esac
+    for commit in $new; do
+        case " $pushed " in *" $commit "*) ;; *) pushed="$pushed $commit" ;; esac
+    done
+done
+[ -n "$pushed" ] || exit 0
+
+top=$(git rev-parse --show-toplevel) || exit 0
+
+# A submodule's commits are also reviewed for sessions in its superprojects, so
+# the outermost superproject bounds where such a session may run.
+outer=$top
+while super=$(git -C "$outer" rev-parse --show-superproject-working-tree 2>/dev/null) &&
+    [ -n "$super" ]; do
+    outer=$super
+done
+
+# The names of the open interactive sessions that see this worktree,
+# comma-separated: those inside it, and those in a superproject directory that
+# contains it. A session in a sibling submodule does not count.
+agents=$(claude agents --json 2>/dev/null) || {
+    printf 'review-on-push: claude agents failed, no review started\n' >&2
+    exit 0
+}
+sessions=$(printf '%s\n' "$agents" | jq -r --arg top "$top" --arg outer "$outer" '
+    def within($dir): . == $dir or startswith($dir + "/");
+    [.[] | select(.kind == "interactive"
+            and .name != null
+            and (.name | startswith("review-") | not))
+     | .cwd as $cwd
+     | select(($cwd | within($top)) or (($cwd | within($outer)) and ($top | within($cwd))))
+     | .name] | join(", ")
+')
+[ -n "$sessions" ] || exit 0
+
+# rev-list lists the newest commit first, and the review reads them oldest first.
+set -- $pushed
+newest=$1
+oldest_first=
+for commit in "$@"; do
+    oldest_first="$commit $oldest_first"
+done
+count=$#
+short=$(git rev-parse --short "$newest")
+subject=$(git log -1 --format=%s "$newest")
+logdir=$(git rev-parse --path-format=absolute --git-path review-on-push)
+log=$logdir/$short.log
+mkdir -p "$logdir" || exit 0
+
+prompt="/review the pushed commits $oldest_first
+
+This review runs in the background, while the commits are pushed. Review these $count commits together as one change, oldest first: $oldest_first. Read each with \`git show <sha>\`, and judge the change as a whole, so a problem that a later commit of these fixes is no finding. Read any further code and history the review needs. Tests are not run here, so judge them by reading them. Run git from the current directory, without \`cd\` or \`git -C\`, because only plain \`git log\`, \`git show\`, \`git diff\` and \`git blame\` are allowed.
+
+When the review is done, send its complete findings through SendMessage to each of these Claude Code sessions: $sessions. Start the message with: \"Review of $count pushed commits up to $short ($subject) finished. Handle it with the handle-reviews skill.\" When there are no findings, send only: \"Review of $count pushed commits up to $short ($subject) finished with no findings. Handle it with the handle-reviews skill.\"
+
+End with the complete findings as your final answer. It is saved as the review log."
+
+# The review skill reads its references and the shared standards from here.
+set --
+for dir in "$HOME/.claude/skills" "$HOME/.copilot/instructions"; do
+    [ -d "$dir" ] && set -- "$@" --add-dir "$dir"
+done
+
+nohup claude -p "$prompt" \
+    --name "review-$short" \
+    --no-session-persistence \
+    --permission-prompts none \
+    --permission-mode dontAsk \
+    --strict-mcp-config \
+    "$@" \
+    --tools "Read,Grep,Glob,Skill,SendMessage,Bash" \
+    --allowedTools "Bash(git log:*)" "Bash(git show:*)" "Bash(git diff:*)" "Bash(git blame:*)" \
+    </dev/null >"$log" 2>&1 &
+
+printf 'review-on-push: reviewing %s commits up to %s in the background, log: %s\n' "$count" "$short" "$log" >&2
