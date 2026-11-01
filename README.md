@@ -32,7 +32,9 @@ Agent skills for Claude Code, GitHub Copilot, and other coding agents that read 
 | [`rust-code-review`](./rust-code-review/) | both | any | Severity-ordered Rust code review with file/line evidence. Ships the Rust standards file the other Rust skills use. |
 | [`rust-code-style`](./rust-code-style/) | both | any | Behavior-preserving Rust style refactors aligned to repository conventions. |
 | [`handle-reviews`](./handle-reviews/) | both | Claude Code | Handle review results that reach the session: background review findings, review subagent reports, PR review comments. |
-| [`install-review-on-push`](./install-review-on-push/) | you | Claude Code | Install a pre-push hook that reviews the pushed commits in a read-only background Claude Code run and messages the findings to the open sessions. |
+| [`install-review-on-push`](./install-review-on-push/) | you | Claude Code | Install a pre-push hook that reviews the pushed commits with one or more review skills, each in a read-only background Claude Code run, and messages the findings to the open sessions. |
+| [`architecture`](./architecture/) | both | any | Keep a Rust workspace's `ARCHITECTURE.md` current: a derived code graph of crates, modules, and external crates, checked against the components declared in `architecture.toml`. |
+| [`architecture-review`](./architecture-review/) | both | any | Review a change's effect on the architecture: note every graph change and judge the dependency structure. Runs on push via `install-review-on-push`. |
 | [`project-setup`](./project-setup/) | both | any | Scaffold a Rust workspace with tooling conventions and the three-layer AI instruction architecture. |
 | [`youtube-summary`](./youtube-summary/) | both | any | Download a YouTube transcript and summarize it: notable points, action plan, critique of weak claims. |
 
@@ -50,14 +52,16 @@ Some skills use others by name and expect them to be installed next to them:
 - `rust-code-review` → `code-review-core`
 - `rust-code-style` → `rust-code-review` (for its standards file)
 - `handle-reviews` → `grill-fast`
-- `install-review-on-push` → `review`, `handle-reviews`
+- `install-review-on-push` → `handle-reviews`, and the review skills it runs (`review`, optionally `architecture-review`)
+- `architecture-review` → `architecture`
 - `project-setup` → `review`
 
 Some skills also need command-line tools:
 
 - `gh` (GitHub) or `glab` (GitLab): `pr`, `finalize-pr`, `update-pr`, `pr-threads`
-- `python3`: `grill-tree`, `youtube-summary`
+- `python3`: `grill-tree`, `youtube-summary`, and (3.11 or newer) `architecture`, `architecture-review`
 - `claude` and `jq`: the hook that `install-review-on-push` installs
+- `cargo-modules`: `architecture`, `architecture-review`
 
 ## Installation
 

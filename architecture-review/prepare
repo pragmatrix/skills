@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Builds the architecture snapshots of two revisions and the change between
+# them, for the architecture-review skill.
+#
+#   prepare <base> <head>
+#
+# Run it from inside the repository. <base> is "-" when the change starts at
+# the repository's first commit. The workspace root is the directory of the
+# first architecture.toml at <head>, else the repository's top level. Each
+# snapshot is extracted in a temporary git worktree, so the working tree stays
+# untouched. The results go to .git/review-on-push/architecture-<short head>/:
+# base.json and head.json (the snapshots) and view.md (the diff view). The
+# change summary goes to stdout.
+
+[ $# -eq 2 ] || { printf 'usage: prepare <base> <head>\n' >&2; exit 2; }
+base=$1
+head=$2
+script=$(dirname "$0")/../architecture/architecture.py
+
+top=$(git rev-parse --show-toplevel) || exit 1
+short=$(git rev-parse --short "$head") || exit 1
+toml=$(git ls-tree -r --name-only "$head" | grep -E '(^|/)architecture\.toml$' | head -n 1)
+root=$top/${toml%architecture.toml}
+out=$(git rev-parse --path-format=absolute --git-path review-on-push)/architecture-$short
+mkdir -p "$out" || exit 1
+
+base_file=-
+if [ "$base" != - ]; then
+    base_file=$out/base.json
+    python3 "$script" snapshot --root "$root" --rev "$base" -o "$base_file" || exit 1
+fi
+python3 "$script" snapshot --root "$root" --rev "$head" -o "$out/head.json" || exit 1
+python3 "$script" diff "$base_file" "$out/head.json" --view "$out/view.md" \
+    --base-label "$base" --head-label "$short"

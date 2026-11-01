@@ -2,17 +2,19 @@
 
 # review-on-push pre-push hook.
 #
-# Reviews the commits a push sends, together as one change, with the `review`
-# skill in a headless Claude Code run, but only while an interactive Claude
-# Code session is open in this worktree, or in a superproject directory that
-# contains it. The run starts in the background, so the push goes through at
-# once. The run is read-only: it gets the file reading tools and Bash limited
-# to read-only git commands. Don't-ask mode denies reads outside the working
-# directories, so the skills folder the review reads is added as a directory.
-# It messages its findings to the open sessions, which handle them with the
-# handle-reviews skill, and ends. Its final answer, the findings, goes to
-# .git/review-on-push/<sha>.log. Runs are named review-<sha>, and the hook never
-# counts them as open sessions.
+# Reviews the commits a push sends, together as one change, with each skill in
+# review_skills, but only while an interactive Claude Code session is open in
+# this worktree, or in a superproject directory that contains it. Each skill
+# gets a headless Claude Code run of its own, started in the background, so the
+# push goes through at once. A run is read-only: it gets the file reading tools
+# and Bash limited to read-only git commands. A skill whose folder holds an
+# executable named prepare may also call that script, which builds what the
+# review reads without changing the working tree. Don't-ask mode denies reads
+# outside the working directories, so the skills folder the review reads is
+# added as a directory. A run messages its findings to the open sessions, which
+# handle them with the handle-reviews skill, and ends. Its final answer, the
+# findings, goes to .git/review-on-push/<skill>-<sha>.log. Runs are named
+# review-<skill>-<sha>, and the hook never counts them as open sessions.
 
 command -v claude >/dev/null 2>&1 || exit 0
 command -v jq >/dev/null 2>&1 || exit 0
@@ -96,38 +98,73 @@ count=$#
 short=$(git rev-parse --short "$newest")
 subject=$(git log -1 --format=%s "$newest")
 logdir=$(git rev-parse --path-format=absolute --git-path review-on-push)
-log=$logdir/$short.log
 mkdir -p "$logdir" || exit 0
 
-prompt="/review the pushed commits $oldest_first
+# The review skills this hook runs, each in a run of its own. install.sh fills
+# in the list.
+review_skills='review'
 
-This review runs in the background, while the commits are pushed. Review these $count commits together as one change, oldest first: $oldest_first. Read each with \`git show <sha>\`, and judge the change as a whole, so a problem that a later commit of these fixes is no finding. Read any further code and history the review needs. Tests are not run here, so judge them by reading them. Run git from the current directory, without \`cd\` or \`git -C\`, because only plain \`git log\`, \`git show\`, \`git diff\` and \`git blame\` are allowed.
-
-When the review is done, send its complete findings through SendMessage to each of these Claude Code sessions: $sessions. Start the message with: \"Review of $count pushed commits up to $short ($subject) finished. Handle it with the handle-reviews skill.\" When there are no findings, send only: \"Review of $count pushed commits up to $short ($subject) finished with no findings. Handle it with the handle-reviews skill.\"
-
-End with the complete findings as your final answer. It is saved as the review log."
-
-# The review skill and the skills it loads, such as rust-code-review with its
+# The review skills and the skills they load, such as rust-code-review with its
 # standards file, are read from the skills folder this hook was installed from.
 # install.sh fills in that folder twice. skills_dir is the path install.sh was
 # run by. skills_dir_resolved is the same folder with symlinks resolved, because
 # the skill folders may be symlinks into a clone that lies elsewhere.
 skills_dir=
 skills_dir_resolved=
+skills=$skills_dir
+[ -d "$skills" ] || skills=$skills_dir_resolved
 set --
 [ -d "$skills_dir" ] && set -- --add-dir "$skills_dir"
 [ -d "$skills_dir_resolved" ] && [ "$skills_dir_resolved" != "$skills_dir" ] &&
     set -- "$@" --add-dir "$skills_dir_resolved"
 
-nohup claude -p "$prompt" \
-    --name "review-$short" \
-    --no-session-persistence \
-    --permission-prompts none \
-    --permission-mode dontAsk \
-    --strict-mcp-config \
-    "$@" \
-    --tools "Read,Grep,Glob,Skill,SendMessage,Bash" \
-    --allowedTools "Bash(git log:*)" "Bash(git show:*)" "Bash(git diff:*)" "Bash(git blame:*)" \
-    </dev/null >"$log" 2>&1 &
+# Starts one review run in the background. The arguments are the run's name,
+# its log, its prompt, one extra allowed tool or an empty string, and then the
+# --add-dir options.
+start_review() {
+    run_name=$1
+    run_log=$2
+    run_prompt=$3
+    run_extra=$4
+    shift 4
+    nohup claude -p "$run_prompt" \
+        --name "$run_name" \
+        --no-session-persistence \
+        --permission-prompts none \
+        --permission-mode dontAsk \
+        --strict-mcp-config \
+        "$@" \
+        --tools "Read,Grep,Glob,Skill,SendMessage,Bash" \
+        --allowedTools "Bash(git log:*)" "Bash(git show:*)" "Bash(git diff:*)" "Bash(git blame:*)" \
+        ${run_extra:+"$run_extra"} \
+        </dev/null >"$run_log" 2>&1 &
+}
 
-printf 'review-on-push: reviewing %s commits up to %s in the background, log: %s\n' "$count" "$short" "$log" >&2
+for skill in $review_skills; do
+    log=$logdir/$skill-$short.log
+    # A log for the same head means this skill reviewed these commits
+    # already, for example by a `git push --dry-run`, which runs this hook
+    # too, or by a push that is repeated.
+    if [ -e "$log" ]; then
+        printf 'review-on-push: %s review of commits up to %s ran already, log: %s\n' \
+            "$skill" "$short" "$log" >&2
+        continue
+    fi
+    extra=
+    prepare_note=
+    if [ -x "$skills/$skill/prepare" ]; then
+        extra="Bash($skills/$skill/prepare:*)"
+        prepare_note=" The skill's preparation script is allowed too, called by this exact path as the command itself: $skills/$skill/prepare"
+    fi
+
+    prompt="/$skill the pushed commits $oldest_first
+
+This review runs in the background, while the commits are pushed. Review these $count commits together as one change, oldest first: $oldest_first. Read each with \`git show <sha>\`, and judge the change as a whole, so a problem that a later commit of these fixes is no finding. Read any further code and history the review needs. Tests are not run here, so judge them by reading them. Run git from the current directory, without \`cd\` or \`git -C\`, because only plain \`git log\`, \`git show\`, \`git diff\` and \`git blame\` are allowed.$prepare_note
+
+When the review is done, send its complete findings through SendMessage to each of these Claude Code sessions: $sessions. Start the message with: \"The $skill review of $count pushed commits up to $short ($subject) finished. Handle it with the handle-reviews skill.\" When there are no findings, send only: \"The $skill review of $count pushed commits up to $short ($subject) finished with no findings. Handle it with the handle-reviews skill.\"
+
+End with the complete findings as your final answer. It is saved as the review log."
+
+    start_review "review-$skill-$short" "$log" "$prompt" "$extra" "$@"
+    printf 'review-on-push: %s review of %s commits up to %s in the background, log: %s\n' "$skill" "$count" "$short" "$log" >&2
+done

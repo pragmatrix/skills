@@ -9,7 +9,7 @@ Review results arrive while the user works on something else. The user decides w
 
 ## 1. Nudge
 
-When a review finishes, check whether others are still running: a background review runs as a `review-<sha>` session in `claude agents --json`, under this session's working directory. A review subagent you started counts until its report is in.
+When a review finishes, check whether others are still running: a background review runs as a `review-<skill>-<sha>` session in `claude agents --json`, under this session's working directory. A review whose finish message has arrived counts as finished, even while its session still shows in that list for a moment. A review subagent you started counts until its report is in.
 
 - While any review still runs, the user hears nothing about reviews: not that they started, not that they run, not how many remain. A review message that arrives then gets a reply of one word, such as "Noted."
 - When the last one finishes, end your current reply with one bold sentence, such as **Reviews of three commits are ready. Say when you want the findings.** Name no count of findings, no severity, and no detail.
@@ -25,7 +25,7 @@ Done when the user asks for the findings.
 
 ## 3. Collect
 
-Gather every unread review. A background review's findings are in its message and in its log, `review-on-push/<short sha>.log` under the git directory of the repository it reviewed (`git rev-parse --git-path review-on-push`). Then check each finding against the current HEAD and the decisions the user made in this session:
+Gather every unread review. A background review's findings are in its message and in its log, `review-on-push/<skill>-<short sha>.log` under the git directory of the repository it reviewed (`git rev-parse --git-path review-on-push`). Then check each finding against the current HEAD and the decisions the user made in this session:
 
 - A finding that a later change already fixed is dropped.
 - Findings that name the same problem become one.
