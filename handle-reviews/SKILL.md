@@ -42,6 +42,6 @@ Done when the user has the list and the question.
 
 ## 5. Decide
 
-Apply the fixes the user approved. Run the decisions through the procedure in `~/.claude/skills/grill-fast/SKILL.md`, and apply each settled decision after the user confirms its ledger.
+Apply the fixes the user approved. Run the decisions through the procedure of the `grill-fast` skill, and apply each settled decision after the user confirms its ledger.
 
 Done when every finding is fixed, decided, or explicitly left by the user.
