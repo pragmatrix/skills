@@ -8,11 +8,11 @@
 # contains it. The run starts in the background, so the push goes through at
 # once. The run is read-only: it gets the file reading tools and Bash limited
 # to read-only git commands. Don't-ask mode denies reads outside the working
-# directories, so the skills and the shared instructions the review reads are
-# added as directories. It messages its findings to the open sessions, which
-# handle them with the handle-reviews skill, and ends. Its final answer, the
-# findings, goes to .git/review-on-push/<sha>.log. Runs are named review-<sha>,
-# and the hook never counts them as open sessions.
+# directories, so the skills folder the review reads is added as a directory.
+# It messages its findings to the open sessions, which handle them with the
+# handle-reviews skill, and ends. Its final answer, the findings, goes to
+# .git/review-on-push/<sha>.log. Runs are named review-<sha>, and the hook never
+# counts them as open sessions.
 
 command -v claude >/dev/null 2>&1 || exit 0
 command -v jq >/dev/null 2>&1 || exit 0
@@ -95,11 +95,17 @@ When the review is done, send its complete findings through SendMessage to each 
 
 End with the complete findings as your final answer. It is saved as the review log."
 
-# The review skill reads its references and the shared standards from here.
+# The review skill and the skills it loads, such as rust-code-review with its
+# standards file, are read from the skills folder this hook was installed from.
+# install.sh fills in that folder twice. skills_dir is the path install.sh was
+# run by. skills_dir_resolved is the same folder with symlinks resolved, because
+# the skill folders may be symlinks into a clone that lies elsewhere.
+skills_dir=
+skills_dir_resolved=
 set --
-for dir in "$HOME/.claude/skills" "$HOME/.copilot/instructions"; do
-    [ -d "$dir" ] && set -- "$@" --add-dir "$dir"
-done
+[ -d "$skills_dir" ] && set -- --add-dir "$skills_dir"
+[ -d "$skills_dir_resolved" ] && [ "$skills_dir_resolved" != "$skills_dir" ] &&
+    set -- "$@" --add-dir "$skills_dir_resolved"
 
 nohup claude -p "$prompt" \
     --name "review-$short" \

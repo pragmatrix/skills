@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 Install into exactly one repository per run. When it is unclear which one is meant, such as for a repository with submodules or inside a submodule, ask the user before installing. A submodule needs its own hook to have its pushes reviewed, and the hook covers sessions in its parent repositories.
 
-Run `<skill-dir>/install.sh` from inside that repository. It copies the hook to the path git resolves for `hooks/pre-push` (this honors `core.hooksPath`) and prints that path. Running it again replaces an earlier copy, which is how the hook is updated.
+Run `<skill-dir>/install.sh` from inside that repository. It copies the hook to the path git resolves for `hooks/pre-push` (this honors `core.hooksPath`) and prints that path. The copy records the skills folder it was installed from, so the background review can read the skills there. Running it again replaces an earlier copy, which is how the hook is updated, also after the skills folder moved.
 
 When it exits with status 3, the repository already has a different `pre-push` hook. Show the user that hook's path and ask how to combine the two, for example by calling the review hook from the existing one. Leave the existing hook unchanged until the user decides.
 
