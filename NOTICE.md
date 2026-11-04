@@ -5,8 +5,8 @@ This repository contains agent skills. Portions are adapted from third-party MIT
 ## Matt Pocock — mattpocock/skills
 
 The following skills come from
-[mattpocock/skills](https://github.com/mattpocock/skills). Some are modified from the
-originals, and the others are unchanged copies:
+[mattpocock/skills](https://github.com/mattpocock/skills), release `v1.3.2`. Some are
+modified from the originals, and the others are unchanged copies:
 
 - `grilling` — from `skills/productivity/grilling`
 - `grill-me` — from `skills/productivity/grill-me`
