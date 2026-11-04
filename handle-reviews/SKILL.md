@@ -12,10 +12,11 @@ Review results arrive while the user works on something else. The user decides w
 When a review finishes, check whether others are still running: a background review runs as a `review-<skill>-<sha>` session in `claude agents --json`, under this session's working directory. A review whose finish message has arrived counts as finished, even while its session still shows in that list for a moment. A review subagent you started counts until its report is in.
 
 - While any review still runs, the user hears nothing about reviews: not that they started, not that they run, not how many remain. A review message that arrives then gets a reply of one word, such as "Noted."
-- When the last one finishes, end your current reply with one bold sentence, such as **Reviews of three commits are ready. Say when you want the findings.** Name no count of findings, no severity, and no detail.
-- Before a push or finalize, repeat that sentence while findings are unread. Reviews that still run stay unmentioned.
+- When the last one finishes, end your current reply with one bold sentence and the finding counts after it, such as **Reviews of three commits are ready. Say when you want the findings.** C1H3M5L3?2
+- The counts sum the findings of every unread review per severity, as the reviews report them, before step 3 merges or drops any, so the list can come out shorter. `C`, `H`, `M`, and `L` stand for Critical, High, Medium, and Low, and `?` for findings without a severity, such as PR comments. A severity without findings is left out. When no unread review has findings, the sentence says so in place of the counts, such as **Reviews of three commits are ready, with no findings.** The counts are the only detail the nudge carries.
+- Before a push or finalize, repeat that sentence and its counts while findings are unread. Reviews that still run stay unmentioned.
 
-Done when the user has the bold sentence and nothing more.
+Done when the user has the bold sentence with its counts, and nothing more.
 
 ## 2. Wait
 
